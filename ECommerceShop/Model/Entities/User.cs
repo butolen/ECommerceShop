@@ -2,8 +2,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ECommerceShop.Entities;
-[Table("administrators")]
-public class Administrator
+[Table("users")]
+public class User
 {
     [Key]
     [Column("username" ,TypeName = "VARCHAR(50)")]
@@ -15,5 +15,7 @@ public class Administrator
     [Column("password" ,TypeName = "VARCHAR(15)")]
     [Required]
     public string Password { get; set; }
-    
+    [Required]
+    [Column("address" ,TypeName = "VARCHAR(200)")]
+    public string Address { get; set; }
 }
