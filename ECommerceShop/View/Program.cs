@@ -1,4 +1,5 @@
 using ECommerceShop.Configurations;
+using ECommerceShop.DLL;
 using Microsoft.EntityFrameworkCore;
 using View.Components;
 
@@ -18,6 +19,7 @@ builder.Services.AddDbContextFactory<ShopContext>(
     )
 );
 
+builder.Services.AddScoped<IStoreService, StoreService>();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
