@@ -4,8 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ECommerceShop.Entities;
 
 [Table("products")]
+
 public class Product
 {
+    //product fertig   
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("product_id", TypeName = "INT")]
@@ -35,4 +37,10 @@ public class Product
     [Column("category", TypeName = "VARCHAR(50)")]
     [Required]
     public string Category { get; set; }
+    
+    
+    [Column("user")]
+    public string UserUsername { get; set; }
+    public User User { get; set; }
+
 }

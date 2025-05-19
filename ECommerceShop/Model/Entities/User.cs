@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ECommerceShop.Entities;
+//users fertig   
 [Table("users")]
 public class User
 {
