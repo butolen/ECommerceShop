@@ -4,8 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ECommerceShop.Entities;
 
 [Table("products")]
+
 public class Product
 {
+    //product fertig   
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("product_id", TypeName = "INT")]

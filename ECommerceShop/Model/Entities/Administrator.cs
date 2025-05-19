@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ECommerceShop.Entities;
+//admin fertig   
 [Table("administrators")]
 public class Administrator
 {

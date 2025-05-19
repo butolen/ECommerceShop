@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ECommerceShop.Entities;
-
+//reviews fertig   
 [Table("reviews")]
 public class reviews
 {
@@ -16,5 +16,5 @@ public class reviews
     [Required]
     [StringLength(50)]
     public string user { get; set; }
-    //reviews fertig
+     
 }
