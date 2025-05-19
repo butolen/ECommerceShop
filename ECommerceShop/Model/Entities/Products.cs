@@ -4,14 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ECommerceShop.Entities;
 
 [Table("products")]
-
 public class Product
 {
-    //product fertig   
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column("product_id", TypeName = "INT")]
-    [Required]
+    [Column("product_id")]
     public int ProductId { get; set; }
 
     [Column("name", TypeName = "VARCHAR(50)")]
@@ -30,17 +27,14 @@ public class Product
     [Required]
     public decimal Price { get; set; }
 
-    [Column("inStock", TypeName = "INT")]
+    [Column("instock")]
     [Required]
     public int InStock { get; set; }
 
     [Column("category", TypeName = "VARCHAR(50)")]
     [Required]
     public string Category { get; set; }
-    
-    
-    [Column("user")]
-    public string UserUsername { get; set; }
-    public User User { get; set; }
 
+    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+    public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }

@@ -2,24 +2,26 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ECommerceShop.Entities;
-//reviews fertig   
+
 [Table("reviews")]
-public class reviews
+public class Review
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int reviewId { get; set; }
-    
+    [Column("reviewid")]
+    public int ReviewId { get; set; }
+
     [Required]
-    public int rating { get; set; }
-    
-    public int productId { get; set; }
-    
+    [Column("rating")]
+    public int Rating { get; set; }
+
+    [Column("productid")]
+    public int ProductId { get; set; }
     public Product Product { get; set; }
 
-    
     [Required]
     [StringLength(50)]
-    public string user { get; set; }
-     
+    [Column("username")]
+    public string Username { get; set; }
+    public User User { get; set; }
 }
