@@ -37,4 +37,10 @@ public class Product
     [Column("category", TypeName = "VARCHAR(50)")]
     [Required]
     public string Category { get; set; }
+    
+    
+    [Column("user")]
+    public string UserUsername { get; set; }
+    public User User { get; set; }
+
 }
