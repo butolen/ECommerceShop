@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+
 namespace ECommerceShop.DLL
 {
     public class StoreService : IStoreService
@@ -15,7 +16,7 @@ namespace ECommerceShop.DLL
         {
             _context = context;
         }
-
+        
         public bool Login(string email, string password, out string role)
         {
             role = null;
