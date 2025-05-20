@@ -1,0 +1,79 @@
+﻿@page "/product"
+@using ECommerceShop.Entities
+@inject HttpClient Http
+
+@* Dummy Data Simulation (replace with real DB call) *@
+@code {
+    private Product product = new Product
+    {
+        ProductId = 1,
+        Name = "Hexagon Hantel Set",
+        Image = "placeholder.png",
+        Description = "Hexagon Kurzhantel Set | PVC Bezug | 2,5 kg bis 25 kg Hex Paare | jeweils 2,5 kg Steigerung | Professioneller Bezug",
+        Price = 799.00m,
+        InStock = 96,
+        Category = "Gaming"
+    };
+
+    private int quantity = 1;
+
+    private void Increase() => quantity++;
+    private void Decrease()
+    {
+        if (quantity > 1) quantity--;
+    }
+
+    private async Task AddToCart()
+    {
+        var orderItem = new OrderItem
+        {
+            ProductId = product.ProductId,
+            Username = "demo_user", // Replace when auth system is ready
+            QuantityOrdered = quantity
+        };
+
+        await Http.PostAsJsonAsync("/api/orderitems", orderItem);
+    }
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-6">
+            <img class="img-fluid" src="images/@product.Image" alt="Product" />
+            <div class="d-flex mt-3 gap-2">
+                @for (int i = 0; i < 4; i++)
+                {
+                    <img class="img-thumbnail" src="images/placeholder_thumb.png" style="width: 60px; height: 60px; cursor: pointer;" />
+                }
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h4>@product.Name | 2,5 kg - 25 kg</h4>
+            <div>
+                <span class="text-warning">★★★★★</span> <small>(150 Reviews)</small>
+                <div class="text-success">In Stock</div>
+            </div>
+
+            <h2 class="text-danger mt-3">@product.Price.ToString("0.00")€</h2>
+
+            <p>@product.Description</p>
+            <p><strong>Lagernd:</strong> @product.InStock+</p>
+
+            <div class="d-flex align-items-center my-3">
+                <button class="btn btn-outline-secondary" @onclick="Decrease">-</button>
+                <span class="mx-3">@quantity</span>
+                <button class="btn btn-outline-secondary" @onclick="Increase">+</button>
+            </div>
+
+            <button class="btn text-white" style="background-color: #C30017;" @onclick="AddToCart">
+                Add to Cart
+            </button>
+
+            <div class="mt-4 border p-3">
+                <p><strong>🚚 Free Delivery</strong><br /><small>Enter your postal code for Delivery Availability</small></p>
+                <p><strong>🔁 Return Delivery</strong><br /><small>Free 30 Days Delivery Returns</small></p>
+            </div>
+        </div>
+    </div>
+</div>
