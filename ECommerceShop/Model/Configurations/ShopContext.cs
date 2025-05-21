@@ -41,6 +41,8 @@ public class ShopContext : DbContext
         modelBuilder.Entity<Review>()
             .Property(r => r.ReviewId)
             .ValueGeneratedOnAdd();
+        modelBuilder.Entity<OrderItem>()
+            .HasKey(o => new { o.ProductId, o.Username });
     }
 
 }
