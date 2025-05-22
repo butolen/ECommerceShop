@@ -9,27 +9,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var app = builder.Build();
-
-builder.Services.AddDbContextFactory<ShopContext>(
-    options => options.UseMySql(
-        builder.Configuration
-            .GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8,0,27))
+// ✅ Service-Registrierung VOR builder.Build()
+builder.Services.AddDbContextFactory<ShopContext>(options =>
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        new MySqlServerVersion(new Version(8, 0, 27))
     )
 );
 
 builder.Services.AddScoped<IStoreService, StoreService>();
-// Configure the HTTP request pipeline.
+
+var app = builder.Build();
+
+// Middleware & Routing
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
 
