@@ -23,7 +23,7 @@ public class Product
     [Required]
     public string Description { get; set; }
 
-    [Column("price", TypeName = "DECIMAL(5,2)")]
+    [Column("price", TypeName = "DECIMAL(10,2)")]
     [Required]
     public decimal Price { get; set; }
 

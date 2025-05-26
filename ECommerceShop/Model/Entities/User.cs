@@ -20,7 +20,6 @@ public class User
     public string Password { get; set; }
 
     [Column("address", TypeName = "VARCHAR(200)")]
-    [Required]
     public string Address { get; set; }
 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
