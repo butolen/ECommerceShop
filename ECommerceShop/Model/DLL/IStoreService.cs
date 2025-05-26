@@ -5,7 +5,12 @@ namespace ECommerceShop.DLL;
 public interface IStoreService
 {
     // Authentifizierung & Rollen
+ 
+   
+    bool DeleteProduct(string name);
+    
     bool Login(string email,string userName, string password, out string role);
+    public bool RegisterUser(string email, string username, string password, out string message);
     string GetUserRole(string email);
 
     // Produktsuche
@@ -15,7 +20,7 @@ public interface IStoreService
     List<Product> SearchByRating(int minStars);
 
     // Admin
-    void AddProduct(Product product, string adminEmail);
+    void AddProduct(Product product);
     bool DeleteUser(string username);
 
     // Warenkorb

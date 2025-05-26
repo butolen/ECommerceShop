@@ -11,19 +11,18 @@ public class Product
     [Column("product_id")]
     public int ProductId { get; set; }
 
-    [Column("name", TypeName = "VARCHAR(50)")]
+    [Column("name", TypeName = "VARCHAR(700)")]
     [Required]
     public string Name { get; set; }
 
-    [Column("image", TypeName = "VARCHAR(50)")]
+    [Column("image", TypeName = "VARCHAR(700)")]
     [Required]
     public string Image { get; set; }
 
     [Column("description", TypeName = "VARCHAR(700)")]
-    [Required]
     public string Description { get; set; }
 
-    [Column("price", TypeName = "DECIMAL(5,2)")]
+    [Column("price", TypeName = "DECIMAL(10,2)")]
     [Required]
     public decimal Price { get; set; }
 
@@ -31,7 +30,7 @@ public class Product
     [Required]
     public int InStock { get; set; }
 
-    [Column("category", TypeName = "VARCHAR(50)")]
+    [Column("category", TypeName = "VARCHAR(700)")]
     [Required]
     public string Category { get; set; }
 

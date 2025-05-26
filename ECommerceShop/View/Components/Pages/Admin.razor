@@ -1,0 +1,108 @@
+﻿@page "/Admin"
+@rendermode InteractiveServer
+@using ECommerceShop.Configurations
+@using ECommerceShop.DLL
+@using ECommerceShop.Entities
+@inject ShopContext Db
+@inject IStoreService StoreService
+@inject NavigationManager Navigation
+<div class="min-h-screen bg-gray-300 flex items-center justify-center justify-content-center p-6">
+    <!-- INNER WRAPPER: begrenzte Breite -->
+    <div class="w-full max-w-6xl">
+
+        <!-- HEADER -->
+        <div class="bg-blue-700 text-white p-4 rounded text-center text-xl font-bold mb-6">
+            ADMIN SITE
+        </div>
+
+        <!-- FLEX CONTENT -->
+        <div class="flex flex-wrap justify-center gap-6">
+
+            <!-- Delete a user -->
+            <div class="bg-gray-100 p-4 rounded shadow w-72">
+                <h2 class="text-lg font-semibold mb-2">Delete a user</h2>
+                <input type="text" @bind="deleteUsername" placeholder="User"
+                       class="w-full px-3 py-2 border rounded mb-2" />
+                <button class="bg-red-800 text-white px-4 py-2 rounded w-full"
+                        @onclick="HandleDeleteUser">Delete</button>
+            </div>
+
+            <!-- Add a product -->
+            <div class="bg-gray-100 p-4 rounded shadow flex-1 min-w-[300px] max-w-md">
+                <h2 class="text-lg font-semibold mb-4">Add a product</h2>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <input type="text" @bind="newProduct.Name" placeholder="Name"
+                           class="px-3 py-2 border rounded" />
+                    <input type="text" @bind="newProduct.Price" placeholder="Price"
+                           class="px-3 py-2 border rounded" />
+                    <input type="text" @bind="newProduct.InStock" placeholder="InStock"
+                           class="px-3 py-2 border rounded" />
+                    <input type="text" @bind="newProduct.Category" placeholder="Category"
+                           class="px-3 py-2 border rounded" />
+                </div>
+
+                <textarea @bind="newProduct.Description" placeholder="Description..."
+                          class="w-full px-3 py-2 border mb-4 rounded h-24"></textarea>
+
+                <input type="text" @bind="newProduct.Image" placeholder="Image filename (e.g. img1.jpg)"
+                       class="w-full px-3 py-2 border rounded mb-2" />
+
+                <div class="flex gap-4 mt-2">
+                    <button class="bg-purple-800 text-white px-4 py-2 rounded flex-1 cursor-not-allowed"
+                            disabled>Upload image</button>
+                    <button class="bg-red-800 text-white px-6 py-2 rounded flex-1"
+                            @onclick="HandleAddProduct">Add</button>
+                </div>
+            </div>
+
+            <!-- Delete a product -->
+            <div class="bg-gray-100 p-4 rounded shadow w-72">
+                <h2 class="text-lg font-semibold mb-2">Delete a product</h2>
+                <input type="text" @bind="deleteProductName" placeholder="Name"
+                       class="w-full px-3 py-2 border rounded mb-2" />
+                <button class="bg-red-800 text-white px-4 py-2 rounded w-full"
+                        @onclick="HandleDeleteProduct">Delete</button>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <p class="text-green-600 mt-6 text-center">@message</p>
+        }
+    </div>
+</div>
+
+@code {
+    private string deleteUsername;
+    private string deleteProductName;
+    private string message;
+    private Product newProduct = new();
+    private string adminEmail = "admin@example.com"; // später dynamisch ersetzen
+
+    private void HandleDeleteUser()
+    {
+        bool success = StoreService.DeleteUser(deleteUsername);
+        message = success ? "User deleted successfully." : "User not found.";
+    }
+
+    private void HandleAddProduct()
+    {
+        try
+        {
+            StoreService.AddProduct(newProduct);
+            message = "Product added successfully.";
+            newProduct = new(); // reset form
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+        }
+    }
+
+    private void HandleDeleteProduct()
+    {
+        bool success = StoreService.DeleteProduct(deleteProductName);
+        message = success ? "Product deleted successfully." : "Product not found.";
+    }
+}

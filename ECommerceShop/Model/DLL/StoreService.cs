@@ -40,6 +40,38 @@ namespace ECommerceShop.DLL
             Console.WriteLine("not registered");
             return false;
         }
+        
+        public bool RegisterUser(string email, string username, string password, out string message)
+        {
+            message = null;
+
+            // Prüfen, ob die E-Mail bereits in Users vorhanden ist
+            bool emailExistsInUsers = _context.Users.Any(u => u.Email == email);
+
+            // Prüfen, ob die E-Mail bereits in Admins vorhanden ist
+            bool emailExistsInAdmins = _context.Administrators.Any(a => a.Email == email);
+
+            if (emailExistsInUsers || emailExistsInAdmins)
+            {
+                message = "Registrierung nicht möglich: Diese E-Mail ist bereits vergeben";
+                return false;
+            }
+
+            // Neuen Benutzer erstellen (ohne Adresse)
+            var newUser = new User
+            {
+                Username = username,
+                Email = email,
+                Password = password,
+                Address = "-" // Platzhalter, da [Required] in Entity definiert ist
+            };
+
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
+
+            message = "Registrierung erfolgreich!";
+            return true;
+        }
 
         public string GetUserRole(string email)
         {
@@ -78,16 +110,21 @@ namespace ECommerceShop.DLL
                 .ToList();
         }
 
-        public void AddProduct(Product product, string adminEmail)
+        public void AddProduct(Product product)
         {
-            var admin = _context.Administrators.FirstOrDefault(a => a.Email == adminEmail);
-            if (admin == null)
-                throw new UnauthorizedAccessException("Nur Admins dürfen Produkte hinzufügen.");
-
+            
             _context.Products.Add(product);
             _context.SaveChanges();
         }
+        public bool DeleteProduct(string name)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Name == name);
+            if (product == null) return false;
 
+            _context.Products.Remove(product);
+            _context.SaveChanges();
+            return true;
+        }
         public bool DeleteUser(string username)
         {
             var user = _context.Users
