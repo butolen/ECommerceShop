@@ -5,7 +5,7 @@ namespace ECommerceShop.DLL;
 public interface IStoreService
 {
     // Authentifizierung & Rollen
-    bool Login(string email, string password, out string role);
+    bool Login(string email,string userName, string password, out string role);
     string GetUserRole(string email);
 
     // Produktsuche

@@ -17,24 +17,27 @@ namespace ECommerceShop.DLL
             _context = context;
         }
         
-        public bool Login(string email, string password, out string role)
+        public bool Login(string email,string userName, string password, out string role)
         {
             role = null;
 
-            var user = _context.Users.SingleOrDefault(u => u.Email == email && u.Password == password);
+            var user = _context.Users.SingleOrDefault(u => u.Email == email && u.Password == password&&u.Username==userName);
             if (user != null)
             {
                 role = "User";
+                Console.WriteLine("user logged in ");
                 return true;
             }
 
-            var admin = _context.Administrators.SingleOrDefault(a => a.Email == email && a.Password == password);
+            var admin = _context.Administrators.SingleOrDefault(a => a.Email == email && a.Password == password &&a.Username==userName);
             if (admin != null)
             {
+                Console.WriteLine("admin logged in");
                 role = "Admin";
                 return true;
             }
 
+            Console.WriteLine("not registered");
             return false;
         }
 
