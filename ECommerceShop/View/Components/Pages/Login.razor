@@ -3,10 +3,12 @@
 @using ECommerceShop.Configurations
 @using ECommerceShop.DLL
 @using ECommerceShop.Entities
+
 @inject ShopContext Db
 @inject IStoreService StoreService
 @inject NavigationManager Navigation
-
+@inject SessionState Session
+@inject LocalStorageService LocalStorage
 <style>
     body {
         background-color: white;
@@ -122,28 +124,45 @@
     private string password;
     private string username;
     private string message;
+    private bool _hasRedirected = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasRedirected)
+        {
+            _hasRedirected = true;
+
+            var storedUsername = await LocalStorage.GetUsername();
+            var storedRole = await LocalStorage.GetRole();
+
+            if (!string.IsNullOrEmpty(storedUsername) && !string.IsNullOrEmpty(storedRole))
+            {
+                if (storedRole == "admin")
+                    Navigation.NavigateTo("/admin", forceLoad: true);
+                else
+                    Navigation.NavigateTo("/", forceLoad: true);
+            }
+        }
+    }
 
     private async Task HandleLogin()
     {
-        string role;
-        bool success = StoreService.Login(email, username, password, out role);
-
+        bool success = StoreService.Login(email, username, password, out var role);
         if (success)
         {
-            message = $"Login successful as {role}";
+            await LocalStorage.SetUserData(username, email, role);
 
-            if (role == "Admin")
-                Navigation.NavigateTo("/Admin");
-            else if (role == "User")
-                Navigation.NavigateTo("/");
+            if (role == "admin")
+                Navigation.NavigateTo("/admin", forceLoad: true);
             else
-                message = "Login erfolgreich, aber unbekannte Rolle.";
+                Navigation.NavigateTo("/", forceLoad: true);
         }
         else
         {
-            message = "Login failed. Please check your credentials.";
+            message = "Login fehlgeschlagen. Falsche Daten.";
         }
     }
+
     private void HandleRegister()
     {
         string registerMessage;
@@ -151,8 +170,6 @@
         message = registerMessage;
     }
 }
-
-
 
 
 

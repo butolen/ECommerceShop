@@ -5,7 +5,73 @@
 @using ECommerceShop.Entities
 @inject ShopContext Db
 @inject IStoreService StoreService
+@inject SessionState Session
+@inject LocalStorageService LocalStorage
 @inject NavigationManager Navigation
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+
+        <!-- Logo -->
+        <a class="navbar-brand fw-bold fs-3 text-dark" href="/" style="margin-right: 30px;">
+            BulkBase
+        </a>
+
+        <!-- Navigation Buttons -->
+        <div class="d-flex align-items-center gap-2">
+            <a class="nav-link custom-nav-link" href="/">Home</a>
+            <a class="nav-link custom-nav-link" href="/products">Products</a>
+        </div>
+
+        <!-- Sign Out + Cart -->
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn logout-btn fw-semibold" @onclick="Logout">Sign Out</button>
+            <a class="nav-link position-relative" href="/cart">
+                <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
+            </a>
+        </div>
+    </div>
+</nav>
+<style>
+    .custom-nav-link {
+        color: black;
+
+        font-weight: 500;
+
+        font-size: 1.2rem;
+        padding: 7px 14px;
+        border-radius: 6px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .custom-nav-link:hover {
+        background-color: #f0f0f0;
+        color: #000;
+        text-decoration: none;
+    }
+
+    .logout-btn {
+        background-color: transparent;
+        border: 2px solid #1f1f1f;
+        color: #1f1f1f;
+        padding: 6px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+        background-color: #1f1f1f;
+        color: white;
+    }
+</style>
+@code {
+    private async Task Logout()
+    {
+        await LocalStorage.ClearUserData();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}
+
+
 <div class="min-h-screen bg-gray-300 flex items-center justify-center justify-content-center p-6">
     <!-- INNER WRAPPER: begrenzte Breite -->
     <div class="w-full max-w-6xl">
@@ -78,7 +144,7 @@
     private string deleteProductName;
     private string message;
     private Product newProduct = new();
-    private string adminEmail = "admin@example.com"; // später dynamisch ersetzen
+    private string adminEmail = "admin@example.com"; // später dynamisch ersetzenorder_items
 
     private void HandleDeleteUser()
     {
@@ -104,5 +170,20 @@
     {
         bool success = StoreService.DeleteProduct(deleteProductName);
         message = success ? "Product deleted successfully." : "Product not found.";
+    }
+    private bool _initialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            _initialized = true;
+
+            var username = await LocalStorage.GetUsername();
+            if (string.IsNullOrEmpty(username))
+            {
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
+        }
     }
 }

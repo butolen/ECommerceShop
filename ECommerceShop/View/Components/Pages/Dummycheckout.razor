@@ -1,6 +1,10 @@
 ﻿@page "/dummycheckout"
+
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @using View.Components.Layout
 @layout MainLayout
+@inject LocalStorageService LocalStorage
+@inject NavigationManager Navigation
 <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container-fluid">
         <!-- Logo ganz links -->
@@ -40,3 +44,22 @@
         <strong>Vielen Dank für deinen Einkauf!</strong>
     </p>
 </div>
+@code{
+
+    private bool _initialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            _initialized = true;
+
+            var username = await LocalStorage.GetUsername();
+            if (string.IsNullOrEmpty(username))
+            {
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
+        }
+    }
+
+}

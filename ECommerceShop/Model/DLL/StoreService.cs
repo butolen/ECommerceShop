@@ -11,10 +11,11 @@ namespace ECommerceShop.DLL
     public class StoreService : IStoreService
     {
         private readonly ShopContext _context;
-
-        public StoreService(ShopContext context)
+        private readonly SessionState _session;
+        public StoreService(ShopContext context, SessionState session)
         {
             _context = context;
+            _session = session;
         }
         
         public List<OrderItem> GetItemsByUser(string username)
@@ -24,27 +25,28 @@ namespace ECommerceShop.DLL
                 .Where(oi => oi.Username == username)
                 .ToList();
         }
-        public bool Login(string email,string userName, string password, out string role)
+        public bool Login(string email, string userName, string password, out string role)
         {
             role = null;
 
-            var user = _context.Users.SingleOrDefault(u => u.Email == email && u.Password == password&&u.Username==userName);
+            var user = _context.Users.SingleOrDefault(u => u.Email == email && u.Password == password && u.Username == userName);
             if (user != null)
             {
                 role = "User";
-                Console.WriteLine("user logged in ");
+                _session.Username = user.Username;
+                _session.Role = role;
                 return true;
             }
 
-            var admin = _context.Administrators.SingleOrDefault(a => a.Email == email && a.Password == password &&a.Username==userName);
+            var admin = _context.Administrators.SingleOrDefault(a => a.Email == email && a.Password == password && a.Username == userName);
             if (admin != null)
             {
-                Console.WriteLine("admin logged in");
                 role = "Admin";
+                _session.Username = admin.Username;
+                _session.Role = role;
                 return true;
             }
 
-            Console.WriteLine("not registered");
             return false;
         }
         

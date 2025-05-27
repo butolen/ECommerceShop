@@ -3,12 +3,14 @@
 @layout MainLayout
 @inject ShopContext Db
 @inject NavigationManager Navigation
-
+@inject SessionState Session
 @using ECommerceShop.Configurations
+@using ECommerceShop.DLL
 @using ECommerceShop.Entities
+
 @using Microsoft.EntityFrameworkCore
 @using View.Components.Layout
-
+@inject LocalStorageService LocalStorage
 <style>
     .card-img-top {
         width: 416px;
@@ -17,36 +19,68 @@
         object-position: center;
     }
 </style>
-<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-    <div class="container-fluid">
-        <!-- Logo ganz links -->
-        <a class="navbar-brand fw-bold" href="/">BulkBase</a>
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
 
-        <!-- Zentrierte Navigation -->
-        <div class="mx-auto">
-            <ul class="navbar-nav flex-row gap-4">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/products">Products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">Sign In</a>
-                </li>
-            </ul>
+        <!-- Logo -->
+        <a class="navbar-brand fw-bold fs-3 text-dark" href="/" style="margin-right: 30px;">
+            BulkBase
+        </a>
+
+        <!-- Navigation Buttons -->
+        <div class="d-flex align-items-center gap-2">
+            <a class="nav-link custom-nav-link" href="/">Home</a>
+            <a class="nav-link custom-nav-link" href="/products">Products</a>
         </div>
 
-        <!-- Warenkorb ganz rechts -->
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-                <a class="nav-link position-relative" href="/cart">
-                    <img src="images/warenkorb.jpg" alt="Cart" style="height: 28px;" />
-                </a>
-            </li>
-        </ul>
+        <!-- Sign Out + Cart -->
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn logout-btn fw-semibold" @onclick="Logout">Sign Out</button>
+            <a class="nav-link position-relative" href="/cart">
+                <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
+            </a>
+        </div>
     </div>
 </nav>
+<style>
+    .custom-nav-link {
+        color: black;
+
+        font-weight: 500;
+
+        font-size: 1.2rem;
+        padding: 7px 14px;
+        border-radius: 6px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .custom-nav-link:hover {
+        background-color: #f0f0f0;
+        color: #000;
+        text-decoration: none;
+    }
+
+    .logout-btn {
+        background-color: transparent;
+        border: 2px solid #1f1f1f;
+        color: #1f1f1f;
+        padding: 6px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+        background-color: #1f1f1f;
+        color: white;
+    }
+</style>
+@code {
+    private async Task Logout()
+    {
+        await LocalStorage.ClearUserData();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}
 
 
 <h1 class="text-center fw-bold fs-1 mb-5">Bulk Base</h1>
@@ -115,7 +149,21 @@
 @code {
 private List<Product>? products;
 private bool showAll = true;
+private bool _initialized = false;
 
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender && !_initialized)
+    {
+        _initialized = true;
+
+        var username = await LocalStorage.GetUsername();
+        if (string.IsNullOrEmpty(username))
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+    }
+}
 protected override async Task OnInitializedAsync()
 {
 products = await Db.Products.ToListAsync();
