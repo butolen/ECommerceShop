@@ -1,4 +1,4 @@
-﻿@page "/login"
+﻿@page "/"
 @rendermode InteractiveServer
 @using ECommerceShop.Configurations
 @using ECommerceShop.DLL
@@ -119,7 +119,7 @@ message = $"Login successful as {role}";
 if (role == "Admin")
 Navigation.NavigateTo("/admin-dashboard");
 else if (role == "User")
-Navigation.NavigateTo("/home");
+Navigation.NavigateTo("/Welcome");
 else
 message = "Login erfolgreich, aber unbekannte Rolle.";
 }
