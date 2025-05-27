@@ -6,6 +6,21 @@
 @inject LocalStorageService LocalStorage
 @inject NavigationManager Navigation
 <style>
+    .custom-nav-link {
+        color: black;
+        font-weight: 500;
+        font-size: 1.2rem;
+        padding: 7px 14px;
+        border-radius: 6px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .custom-nav-link:hover {
+        background-color: #f0f0f0;
+        color: #000;
+        text-decoration: none;
+    }
+
     .logout-btn {
         background-color: transparent;
         border: 2px solid #1f1f1f;
@@ -20,6 +35,7 @@
         color: white;
     }
 </style>
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
     <div class="container-fluid d-flex justify-content-between align-items-center">
 
