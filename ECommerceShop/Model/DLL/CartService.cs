@@ -1,5 +1,5 @@
 ﻿using ECommerceShop.Entities;
-
+//test
 public class CartService
 {
     public List<CartItem> Items { get; set; } = new();
@@ -16,7 +16,7 @@ public class CartService
             Items.Add(new CartItem { Product = product, Quantity = quantity });
         }
     }
-
+    
     public void RemoveFromCart(Product product)
     {
         Items.RemoveAll(i => i.Product.ProductId == product.ProductId);
