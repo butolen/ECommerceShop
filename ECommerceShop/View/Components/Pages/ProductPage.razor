@@ -4,43 +4,17 @@
 @inject ShopContext Db
 @inject NavigationManager Navigation
 @inject IStoreService Ss
-@inject SessionState Session;
+@inject LocalStorageService LocalStorage
+
 @using ECommerceShop.Configurations
 @using ECommerceShop.DLL
 @using ECommerceShop.Entities
-
 @using Microsoft.EntityFrameworkCore
 @using View.Components.Layout
-@inject LocalStorageService LocalStorage
-<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-
-        <!-- Logo -->
-        <a class="navbar-brand fw-bold fs-3 text-dark" href="/" style="margin-right: 30px;">
-            BulkBase
-        </a>
-
-        <!-- Navigation Buttons -->
-        <div class="d-flex align-items-center gap-2">
-            <a class="nav-link custom-nav-link" href="/">Home</a>
-            <a class="nav-link custom-nav-link" href="/products">Products</a>
-        </div>
-
-        <!-- Sign Out + Cart -->
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn logout-btn fw-semibold" @onclick="Logout">Sign Out</button>
-            <a class="nav-link position-relative" href="/cart">
-                <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
-            </a>
-        </div>
-    </div>
-</nav>
 <style>
     .custom-nav-link {
         color: black;
-
         font-weight: 500;
-
         font-size: 1.2rem;
         padding: 7px 14px;
         border-radius: 6px;
@@ -67,17 +41,41 @@
         color: white;
     }
 </style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+
+        <!-- Logo -->
+        <a class="navbar-brand fw-bold fs-3 text-dark" href="/" style="margin-right: 30px;">
+            BulkBase
+        </a>
+
+        <!-- Navigation Buttons -->
+        <div class="d-flex align-items-center gap-2">
+            <a class="nav-link custom-nav-link" href="/">Start</a>
+            <a class="nav-link custom-nav-link" href="/products">Produkte</a>
+        </div>
+
+        <!-- Sign Out + Cart -->
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
+            <a class="nav-link position-relative" href="/cart">
+                <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
+            </a>
+        </div>
+    </div>
+</nav>
+
+
+@*push*@
+<!-- CONTENT -->
 @code {
     private async Task Logout()
     {
         await LocalStorage.ClearUserData();
         Navigation.NavigateTo("/login", forceLoad: true);
     }
-}
-
-@*push*@
-<!-- CONTENT -->
-@code {
+    
     private void AddToCart()
     {
         if (product != null)
@@ -92,24 +90,9 @@ public int ProductId { get; set; }
 
 private Product? product;
 private int quantity = 1;
-private bool _initialized = false;
 
-protected override async Task OnAfterRenderAsync(bool firstRender)
-{
-    if (firstRender && !_initialized)
-    {
-        _initialized = true;
-
-        var username = await LocalStorage.GetUsername();
-        if (string.IsNullOrEmpty(username))
-        {
-            Navigation.NavigateTo("/login", forceLoad: true);
-        }
-    }
-}
 protected override async Task OnInitializedAsync()
 {
-    
 product = await Db.Products.FirstOrDefaultAsync(p => p.ProductId == ProductId);
 }
 
@@ -156,8 +139,8 @@ else
             <p class="fs-4 fw-bold">@product.Price.ToString("0.00")€</p>
             <p>@product.Description</p>
 
-            <p class="text-success fw-bold">✔ in stock</p>
-            <p>Lagernd: @product.InStock+</p>
+            <p class="text-success fw-bold">✔ Lagernd</p>
+            <p>Noch verfügbar: @product.InStock+</p>
 
             <!-- Menge -->
             <div class="input-group mb-3" style="width: 150px;">
@@ -167,17 +150,17 @@ else
             </div>
 
             <!-- Add to Cart -->
-            <button class="btn text-white w-100 mb-3" style="background-color:#C30017;" @onclick="AddToCart">Add to Cart</button>
+            <button class="btn text-white w-100 mb-3" style="background-color:#C30017;" @onclick="AddToCart">Zum Warenkorb hinzufügen</button>
 
 
 
             <!-- Lieferung -->
             <div class="border p-3">
-                <p><strong>🚚 Free Delivery</strong></p>
-                <p>Enter your postal code for Delivery Availability</p>
+                <p><strong>🚚 Kostenlose Lieferung</strong></p>
+                <p>Postleizahl eingeben für mehr Lieferdetails</p>
                 <hr />
-                <p><strong>🔁 Return Delivery</strong></p>
-                <p>Free 30 days delivery returns.</p>
+                <p><strong>🔁 Rücksendung</strong></p>
+                <p>Kostenlos für 30 Tage</p>
             </div>
         </div>
     </div>

@@ -92,22 +92,22 @@
 <div class="login-wrapper">
     <div class="login-box">
         <div class="login-title">BulkBase</div>
-        <div class="login-subtitle">Login</div>
+        <div class="login-subtitle">Anmeldung</div>
 
         <form @onsubmit="HandleLogin">
             <label class="form-label">Email</label>
             <input type="email" @bind="email" class="form-input" placeholder="Email" required />
 
-            <label class="form-label">Password</label>
-            <input type="password" @bind="password" class="form-input" placeholder="Password" required />
+            <label class="form-label">Passwort</label>
+            <input type="password" @bind="password" class="form-input" placeholder="Passwort" required />
 
-            <label class="form-label">Username</label>
-            <input type="text" @bind="username" class="form-input" placeholder="Username" required />
+            <label class="form-label">Name</label>
+            <input type="text" @bind="username" class="form-input" placeholder="Name" required />
 
-            <button type="submit" class="form-button">Login</button>
+            <button type="submit" class="form-button">Anmelden</button>
             <button type="button" class="form-button-register" 
                     @onclick="HandleRegister" >
-                Sign Up
+                Registrieren
             </button>
 
         </form>

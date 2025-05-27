@@ -18,6 +18,19 @@
         object-fit: cover;
         object-position: center;
     }
+    .logout-btn {
+        background-color: transparent;
+        border: 2px solid #1f1f1f;
+        color: #1f1f1f;
+        padding: 6px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+        background-color: #1f1f1f;
+        color: white;
+    }
 </style>
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
     <div class="container-fluid d-flex justify-content-between align-items-center">
@@ -29,13 +42,13 @@
 
         <!-- Navigation Buttons -->
         <div class="d-flex align-items-center gap-2">
-            <a class="nav-link custom-nav-link" href="/">Home</a>
-            <a class="nav-link custom-nav-link" href="/products">Products</a>
+            <a class="nav-link custom-nav-link" href="/">Start</a>
+            <a class="nav-link custom-nav-link" href="/products">Produkte</a>
         </div>
 
         <!-- Sign Out + Cart -->
         <div class="d-flex align-items-center gap-3">
-            <button class="btn logout-btn fw-semibold" @onclick="Logout">Sign Out</button>
+            <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
             <a class="nav-link position-relative" href="/cart">
                 <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
             </a>
@@ -90,8 +103,8 @@
     @*push*@
     <!-- Produkte -->
     <section>
-        <h2 class="fs-4 mb-3"><span style="color:#C30017;">▌</span> Our Products</h2>
-        <h3 class="fs-2 fw-bold mb-4">Explore Our Products</h3>
+        <h2 class="fs-4 mb-3"><span style="color:#C30017;">▌</span> Unsere Produkte</h2>
+        <h3 class="fs-2 fw-bold mb-4">Entdecke die Welt des Sports</h3>
 
         @if (products == null)
         {
@@ -110,7 +123,7 @@
                         <p class="card-text">@product.Description</p>
                         <p class="fw-bold">@product.Price.ToString("0.00") €</p>
                         <button class="btn text-white w-100" style="background-color:#C30017;"
-                                @onclick="() => NavigateToProduct(product.ProductId)">View Product</button>
+                                @onclick="() => NavigateToProduct(product.ProductId)">Zum Produkt</button>
                     </div>
                 </div>
             </div>
@@ -121,7 +134,7 @@
         @if (!showAll)
         {
         <div class="text-center mt-4">
-            <button class="btn btn-outline-dark px-5" @onclick="OnViewAllClicked">View All Products</button>
+            <button class="btn btn-outline-dark px-5" @onclick="OnViewAllClicked">Zeige mehr</button>
         </div>
         }
     </section>
@@ -131,18 +144,18 @@
 <div class="row text-center mt-5 py-5 text-white" style="background-color: #000;">
     <div class="col-md-4">
         <i class="bi bi-truck fs-2"></i>
-        <h5 class="mt-2">Free and Fast Delivery</h5>
-        <p>Free delivery for all orders over 140€</p>
+        <h5 class="mt-2">Schnelle und zuverlässige Lieferung</h5>
+        <p>Kostenlose Lieferung schon ab 140€</p>
     </div>
     <div class="col-md-4">
         <i class="bi bi-headset fs-2"></i>
-        <h5 class="mt-2">Customer Service</h5>
-        <p>Customer service via email</p>
+        <h5 class="mt-2">Kundenservice</h5>
+        <p>Kundenservice per email</p>
     </div>
     <div class="col-md-4">
         <i class="bi bi-arrow-counterclockwise fs-2"></i>
-        <h5 class="mt-2">Money Back Guarantee</h5>
-        <p>You can return items within 30 days</p>
+        <h5 class="mt-2">Geld zurück Garantie</h5>
+        <p>30 Tage Rückgaberecht</p>
     </div>
 </div>
 
