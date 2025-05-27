@@ -1,4 +1,4 @@
-﻿@page "/login"
+﻿@page "/"
 @rendermode InteractiveServer
 @using ECommerceShop.Configurations
 @using ECommerceShop.DLL
@@ -70,17 +70,6 @@
         border-radius: 6px;
         cursor: pointer;
     }
-    .form-button-register {
-        width: 100%;
-        background-color: grey;
-        color: white;
-        padding: 0.75rem;
-        font-size: 1rem;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        margin-top: 10px;
-    }
 
     .form-button:hover {
         background-color: #333;
@@ -103,58 +92,43 @@
             <input type="text" @bind="username" class="form-input" placeholder="Username" required />
 
             <button type="submit" class="form-button">Sign In</button>
-            <button type="button" class="form-button-register" 
-                    @onclick="HandleRegister" >
-                Register
-            </button>
-
         </form>
-        
+
         @if (!string.IsNullOrEmpty(message))
         {
-            <p class="text-center mt-3" style="color: green;">@message</p>
+        <p class="text-center mt-3" style="color: green;">@message</p>
         }
     </div>
 </div>
 
 @code {
-    private string email;
-    private string password;
-    private string username;
-    private string message;
+private string email;
+private string password;
+private string username;
+private string message;
 
-    private async Task HandleLogin()
-    {
-        string role;
-        bool success = StoreService.Login(email, username, password, out role);
+private async Task HandleLogin()
+{
+string role;
+bool success = StoreService.Login(email, username, password, out role);
 
-        if (success)
-        {
-            message = $"Login successful as {role}";
+if (success)
+{
+message = $"Login successful as {role}";
 
-            if (role == "Admin")
-                Navigation.NavigateTo("/Admin");
-            else if (role == "User")
-                Navigation.NavigateTo("/");
-            else
-                message = "Login erfolgreich, aber unbekannte Rolle.";
-        }
-        else
-        {
-            message = "Login failed. Please check your credentials.";
-        }
-    }
-    private void HandleRegister()
-    {
-        string registerMessage;
-        bool registered = StoreService.RegisterUser(email, username, password, out registerMessage);
-        message = registerMessage;
-    }
+if (role == "Admin")
+Navigation.NavigateTo("/admin-dashboard");
+else if (role == "User")
+Navigation.NavigateTo("/Welcome");
+else
+message = "Login erfolgreich, aber unbekannte Rolle.";
 }
-
-
-
-
+else
+{
+message = "Login failed. Please check your credentials.";
+}
+}
+}
 
 
 
@@ -171,7 +145,7 @@
 <div class="min-h-screen flex items-center justify-center bg-gray-50">
     <div class="bg-white p-8 rounded shadow-md w-96 text-center">
         <h1 class="text-3xl font-bold mb-2">BulkBase</h1>
-        <p class="text-sm mb-6">Login/Registrieren</p>
+        <p class="text-sm mb-6">Login</p>
 
         <form @onsubmit="HandleLogin">
             <div class="mb-4">
@@ -195,11 +169,6 @@
             <button type="submit" class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
                 Sign In
             </button>
-
-            <button type="button" class="w-full mt-2 bg-gray-200 text-black py-2 rounded hover:bg-gray-300"
-                    @onclick="HandleRegister">
-                Register
-            </button>
         </form>
 
         @if (!string.IsNullOrEmpty(message))
@@ -222,20 +191,21 @@
 
         if (success)
         {
-            message = $"Login Erfolgreich";
-            // Navigation logic folgt später
+            // Optional: Message anzeigen
+            message = $"Login successful as {role}";
+
+            // Weiterleitung je nach Rolle
+            if (role == "Admin")
+                Navigation.NavigateTo("/admin-dashboard");
+            else if (role == "User")
+                Navigation.NavigateTo("/home");
+            else
+                message = "Login erfolgreich, aber unbekannte Rolle.";
         }
         else
         {
-            message = "Login fehlgeschlagen. Falsche Daten";
+            message = "Login failed. Please check your credentials.";
         }
-    }
-
-    private void HandleRegister()
-    {
-        string registerMessage;
-        bool registered = StoreService.RegisterUser(email, username, password, out registerMessage);
-        message = registerMessage;
     }
 }
 *@

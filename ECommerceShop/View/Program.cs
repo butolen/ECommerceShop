@@ -19,6 +19,8 @@ builder.Services.AddDbContextFactory<ShopContext>(options =>
 
 builder.Services.AddScoped<IStoreService, StoreService>();
 
+builder.Services.AddSingleton<CartService>();
+
 var app = builder.Build();
 
 // Middleware & Routing
