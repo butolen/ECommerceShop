@@ -18,6 +18,51 @@ namespace ECommerceShop.DLL
             _session = session;
         }
         
+        public void AddToCart(string username, int productId, int quantity)
+        {
+            // Produkt und Benutzer holen
+            var product = _context.Products.FirstOrDefault(p => p.ProductId == productId);
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+
+            if (product == null || user == null)
+            {
+                Console.WriteLine("Produkt oder Benutzer nicht gefunden.");
+                return;
+            }
+
+            // Bereits im Warenkorb befindliche Menge
+            var existingItem = _context.OrderItems
+                .FirstOrDefault(o => o.Username == username && o.ProductId == productId);
+
+            int existingQuantity = existingItem?.QuantityOrdered ?? 0;
+            int totalRequested = existingQuantity + quantity;
+
+            // Verfügbarkeit prüfen
+            if (product.InStock< totalRequested)
+            {
+                Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
+                return;
+            }
+
+            if (existingItem != null)
+            {
+                existingItem.QuantityOrdered += quantity;
+            }
+            else
+            {
+                var newItem = new OrderItem
+                {
+                    Username = username,
+                    ProductId = productId,
+                    QuantityOrdered = quantity
+                };
+
+                _context.OrderItems.Add(newItem);
+            }
+
+            _context.SaveChanges();
+        }
+        
         public List<OrderItem> GetItemsByUser(string username)
         {
             return _context.OrderItems
@@ -151,44 +196,7 @@ namespace ECommerceShop.DLL
             return true;
         }
 
-        public void AddToCart(string username, int productId, int quantity)
-        {
-            // Hole Produkt und Benutzer
-            var product = _context.Products.FirstOrDefault(p => p.ProductId == productId);
-            var user = _context.Users.FirstOrDefault(u => u.Username == username);
-
-            // Wenn eines nicht existiert → abbrechen
-            if (product == null || user == null)
-            {
-                Console.WriteLine("Produkt oder Benutzer nicht gefunden.");
-                return;
-            }
-
-            // Prüfe, ob es schon ein OrderItem für diesen Benutzer + Produkt gibt
-            var existingItem = _context.OrderItems
-                .FirstOrDefault(o => o.Username == username && o.ProductId == productId);
-
-            if (existingItem != null)
-            {
-                // Schon vorhanden → Menge erhöhen
-                existingItem.QuantityOrdered += quantity;
-            }
-            else
-            {
-                // Neues OrderItem hinzufügen
-                var newItem = new OrderItem
-                {
-                    Username = username,
-                    ProductId = productId,
-                    QuantityOrdered = quantity
-                };
-
-                _context.OrderItems.Add(newItem);
-            }
-
-            // Speichern
-            _context.SaveChanges();
-        }
+        
         public void RemoveFromCart(string username, int productId)
         {
             var item = _context.OrderItems
@@ -213,27 +221,27 @@ namespace ECommerceShop.DLL
             }
         }
 
-        public bool CompletePurchase(string username)
+        public void CompletePurchase(string username)
         {
-            var cartItems = _context.OrderItems
-                .Include(o => o.Product)
+            var items = _context.OrderItems
                 .Where(o => o.Username == username)
+                .Include(o => o.Product)
                 .ToList();
 
-            foreach (var item in cartItems)
+            foreach (var item in items)
             {
-                if (item.Product.InStock < item.QuantityOrdered)
-                    return false;
-            }
+                // Lagerbestand reduzieren
+                item.Product.InStock-= item.QuantityOrdered;
 
-            foreach (var item in cartItems)
-            {
-                item.Product.InStock -= item.QuantityOrdered;
+
+                // Optional: Minimum 0 sicherstellen
+                if (item.Product.InStock < 0)
+                    item.Product.InStock = 0;
+
                 _context.OrderItems.Remove(item);
             }
 
             _context.SaveChanges();
-            return true;
         }
 
         public void WriteReview(string username, int productId, int rating, string comment)

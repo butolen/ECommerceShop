@@ -8,6 +8,7 @@ public interface IStoreService
  
    
     bool DeleteProduct(string name);
+    
     public List<OrderItem> GetItemsByUser(string username);
     bool Login(string email,string userName, string password, out string role);
     public bool RegisterUser(string email, string username, string password, out string message);
@@ -27,7 +28,7 @@ public interface IStoreService
     void AddToCart(string username, int productId, int quantity);
     void RemoveFromCart(string username, int productId);
     void ChangeQuantity(string username, int productId, int newQuantity);
-    bool CompletePurchase(string username);
+    void CompletePurchase(string username);
 
     // Bewertung
     void WriteReview(string username, int productId, int rating, string comment);

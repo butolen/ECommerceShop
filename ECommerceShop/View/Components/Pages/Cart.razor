@@ -112,9 +112,9 @@
                     <span>Gesamtwert</span>
                     <span>@totalPrice.ToString("0.00")€</span>
                 </div>
-                <a class="nav-link" href="/dummycheckout">
-                    <button class="btn text-white w-100 mb-3" style="background-color: #C30017;">Zur Kassa</button>
-                </a>
+                <button class="btn text-white w-100 mb-3" style="background-color: #C30017;" @onclick="CompleteCheckout">
+                    Zur Kassa
+                </button>
 
                 <p class="fw-semibold mb-2">Unsere Zahlungsmethoden:</p>
                 <img src="images/payments.png" alt="Zahlungsmethoden" class="mb-3" style="max-width: 100%;" />
@@ -133,6 +133,25 @@
     private List<OrderItem> cartItems = new();
     private decimal totalPrice;
     private bool _initialized = false;
+    
+    private async Task CompleteCheckout()
+    {
+        var username = await LocalStorage.GetUsername();
+        if (string.IsNullOrEmpty(username))
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+
+        StoreService.CompletePurchase(username); // Neuer Service-Aufruf
+
+        // Leeren Warenkorb anzeigen
+        cartItems.Clear();
+        totalPrice = 0;
+
+        // Weiterleitung (optional)
+        Navigation.NavigateTo("/dummycheckout", forceLoad: true);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
