@@ -2,7 +2,7 @@ DELETE FROM products;
 ALTER TABLE products MODIFY price DECIMAL(10,2);
 INSERT INTO products (name, price, category, instock, image, description)
 VALUES
-    ('Hexagon Hantel Set', 799.00, 'Hanteln', 30, 'images/hexagon_hantel.jpg', 'Solide Gummi-Hanteln mit Hex-Form für sicheres Training.'),
+    ('Hexagon Hantel Set', 799.00, 'Hanteln', 35, 'images/hexagon_hantel.jpg', 'Solide Gummi-Hanteln mit Hex-Form für sicheres Training.'),
     ('Kabelzug Station', 1649.00, 'Geräte', 10, 'images/kabelzug_station.jpg', 'Multifunktionale Kabelzugstation für Oberkörpertraining.'),
     ('Langhantel Set 100kg', 899.00, 'Hanteln', 15, 'images/langhantel_set.jpg', 'Langhantel mit 100kg Gewichtsscheiben, ideal für Krafttraining.'),
     ('Kurzhantel Set 2–30kg', 1349.00, 'Hanteln', 25, 'images/kurzhantel_set.jpg', 'Kurzhantel-Set mit variabler Gewichtsauswahl von 2 bis 30 kg.'),
