@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ECommerceShop.Entities;
 
-[Table("products_has_users")]
+[Table("order_items")]
 public class OrderItem
 {
    

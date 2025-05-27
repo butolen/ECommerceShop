@@ -1,25 +1,36 @@
 ﻿@page "/cart"
-@inject CartService CartService
-@*push*@
+@using ECommerceShop.DLL
+@using ECommerceShop.Entities
+@inject IStoreService StoreService
+@rendermode InteractiveServer
 <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="#">BulkBase</a>
+        <!-- Logo ganz links -->
+        <a class="navbar-brand fw-bold" href="/">BulkBase</a>
 
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto">
+        <!-- Zentrierte Navigation -->
+        <div class="mx-auto">
+            <ul class="navbar-nav flex-row gap-4">
                 <li class="nav-item">
-                    <a class="nav-link" href="/productoverview">Home</a>
+                    <a class="nav-link" href="/">Home</a>
                 </li>
-            </ul>
-
-            <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link position-relative" href="/cart">
-                        <img src="images/warenkorb.jpg" alt="Cart" style="height: 28px;" />
-                    </a>
+                    <a class="nav-link" href="/products">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Sign In</a>
                 </li>
             </ul>
         </div>
+
+        <!-- Warenkorb ganz rechts -->
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <a class="nav-link position-relative" href="/cart">
+                    <img src="images/warenkorb.jpg" alt="Cart" style="height: 28px;" />
+                </a>
+            </li>
+        </ul>
     </div>
 </nav>
 
@@ -27,9 +38,9 @@
     <div class="row">
         <div class="col-md-7">
             <h3 class="fw-bold">Dein Warenkorb</h3>
-            <p>@(CartService.Items.Count) Artikel</p>
+            <p>@cartItems.Count Artikel</p>
 
-            @foreach (var item in CartService.Items)
+            @foreach (var item in cartItems)
             {
                 <div class="d-flex mb-4">
                     <img src="@item.Product.Image" alt="@item.Product.Name" style="width: 120px; height: 120px; object-fit: cover;" class="me-3" />
@@ -37,11 +48,11 @@
                     <div class="flex-grow-1">
                         <h5 class="fw-bold mb-1">@item.Product.Name</h5>
                         <p class="mb-1">Größe: Einheitsgröße<br />Farbe: Schwarz</p>
-                        <a href="#" class="text-danger text-decoration-none d-block mb-2"
-                           @onclick="() => CartService.RemoveFromCart(item.Product)">Entfernen</a>
+                        <a href="/cart" class="text-danger text-decoration-none d-block mb-2"
+                           @onclick="() => RemoveItem(item.Product.ProductId)">Entfernen</a>
 
                         <div class="input-group" style="width: 120px;">
-                            <input type="text" class="form-control text-center" value="@item.Quantity" readonly />
+                            <input type="text" class="form-control text-center" value="@item.QuantityOrdered" readonly />
                         </div>
                     </div>
                 </div>
@@ -52,7 +63,7 @@
             <div class="border p-4 bg-light">
                 <div class="d-flex justify-content-between mb-2">
                     <span>Zwischensumme:</span>
-                    <span>@(CartService.Items.Sum(i => i.Product.Price * i.Quantity).ToString("0.00"))€</span>
+                    <span>@totalPrice.ToString("0.00")€</span>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
                     <span>Lieferung:</span>
@@ -61,10 +72,11 @@
                 <hr />
                 <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
                     <span>Gesamtwert</span>
-                    <span>@(CartService.Items.Sum(i => i.Product.Price * i.Quantity).ToString("0.00"))€</span>
+                    <span>@totalPrice.ToString("0.00")€</span>
                 </div>
-                <a class="nav-link" href="/dummycheckout"><button class="btn text-white w-100 mb-3" style="background-color: #C30017;">Zur Kassa</button></a>
-                
+                <a class="nav-link" href="/dummycheckout">
+                    <button class="btn text-white w-100 mb-3" style="background-color: #C30017;">Zur Kassa</button>
+                </a>
 
                 <p class="fw-semibold mb-2">Unsere Zahlungsmethoden:</p>
                 <img src="images/payments.png" alt="Zahlungsmethoden" class="mb-3" style="max-width: 100%;" />
@@ -78,3 +90,25 @@
         </div>
     </div>
 </div>
+
+@code {
+    private List<OrderItem> cartItems = new();
+    private decimal totalPrice;
+
+    protected override void OnInitialized()
+    {
+        LoadCart();
+    }
+
+    private void LoadCart()
+    {
+        cartItems = StoreService.GetItemsByUser("h.muster");
+        totalPrice = cartItems.Sum(i => i.Product.Price * i.QuantityOrdered);
+    }
+
+    private void RemoveItem(int productId)
+    {
+        StoreService.RemoveFromCart("h.muster", productId);
+        LoadCart(); // neu laden
+    }
+}

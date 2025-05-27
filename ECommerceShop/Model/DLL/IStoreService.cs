@@ -8,7 +8,7 @@ public interface IStoreService
  
    
     bool DeleteProduct(string name);
-    
+    public List<OrderItem> GetItemsByUser(string username);
     bool Login(string email,string userName, string password, out string role);
     public bool RegisterUser(string email, string username, string password, out string message);
     string GetUserRole(string email);

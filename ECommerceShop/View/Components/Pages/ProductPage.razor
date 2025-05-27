@@ -3,36 +3,45 @@
 @layout MainLayout
 @inject ShopContext Db
 @inject NavigationManager Navigation
-@inject CartService CartService
-
+@inject IStoreService Ss
 
 @using ECommerceShop.Configurations
+@using ECommerceShop.DLL
 @using ECommerceShop.Entities
 @using Microsoft.EntityFrameworkCore
 @using View.Components.Layout
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="#">BulkBase</a>
+        <!-- Logo ganz links -->
+        <a class="navbar-brand fw-bold" href="/">BulkBase</a>
 
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto">
+        <!-- Zentrierte Navigation -->
+        <div class="mx-auto">
+            <ul class="navbar-nav flex-row gap-4">
                 <li class="nav-item">
-                    <a class="nav-link" href="/productoverview">Home</a>
+                    <a class="nav-link" href="/">Home</a>
                 </li>
-            </ul>
-
-            <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link position-relative" href="/cart">
-                        <img src="images/warenkorb.jpg" alt="Cart" style="height: 28px;" />
-                    </a>
+                    <a class="nav-link" href="/products">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Sign In</a>
                 </li>
             </ul>
         </div>
+
+        <!-- Warenkorb ganz rechts -->
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <a class="nav-link position-relative" href="/cart">
+                    <img src="images/warenkorb.jpg" alt="Cart" style="height: 28px;" />
+                </a>
+            </li>
+        </ul>
     </div>
 </nav>
+
 @*push*@
 <!-- CONTENT -->
 @code {
@@ -40,7 +49,7 @@
     {
         if (product != null)
         {
-            CartService.AddToCart(product, quantity);
+            Ss.AddToCart("h.muster", product.ProductId, quantity);
         }
     }
 

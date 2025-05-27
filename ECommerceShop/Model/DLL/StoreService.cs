@@ -17,6 +17,13 @@ namespace ECommerceShop.DLL
             _context = context;
         }
         
+        public List<OrderItem> GetItemsByUser(string username)
+        {
+            return _context.OrderItems
+                .Include(oi => oi.Product)
+                .Where(oi => oi.Username == username)
+                .ToList();
+        }
         public bool Login(string email,string userName, string password, out string role)
         {
             role = null;
@@ -63,7 +70,7 @@ namespace ECommerceShop.DLL
                 Username = username,
                 Email = email,
                 Password = password,
-                Address = "-" // Platzhalter, da [Required] in Entity definiert ist
+              
             };
 
             _context.Users.Add(newUser);
@@ -144,26 +151,42 @@ namespace ECommerceShop.DLL
 
         public void AddToCart(string username, int productId, int quantity)
         {
-            var item = _context.OrderItems
+            // Hole Produkt und Benutzer
+            var product = _context.Products.FirstOrDefault(p => p.ProductId == productId);
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+
+            // Wenn eines nicht existiert → abbrechen
+            if (product == null || user == null)
+            {
+                Console.WriteLine("Produkt oder Benutzer nicht gefunden.");
+                return;
+            }
+
+            // Prüfe, ob es schon ein OrderItem für diesen Benutzer + Produkt gibt
+            var existingItem = _context.OrderItems
                 .FirstOrDefault(o => o.Username == username && o.ProductId == productId);
 
-            if (item != null)
+            if (existingItem != null)
             {
-                item.QuantityOrdered += quantity;
+                // Schon vorhanden → Menge erhöhen
+                existingItem.QuantityOrdered += quantity;
             }
             else
             {
-                _context.OrderItems.Add(new OrderItem
+                // Neues OrderItem hinzufügen
+                var newItem = new OrderItem
                 {
                     Username = username,
                     ProductId = productId,
                     QuantityOrdered = quantity
-                });
+                };
+
+                _context.OrderItems.Add(newItem);
             }
 
+            // Speichern
             _context.SaveChanges();
         }
-
         public void RemoveFromCart(string username, int productId)
         {
             var item = _context.OrderItems

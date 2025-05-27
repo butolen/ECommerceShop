@@ -1,8 +1,53 @@
-﻿@page "/Welcome"
-@using View.Components.Layout
+﻿@page "/"
 @rendermode InteractiveServer
 @layout MainLayout
+@inject ShopContext Db
 @inject NavigationManager Navigation
+
+@using ECommerceShop.Configurations
+@using ECommerceShop.Entities
+@using Microsoft.EntityFrameworkCore
+@using View.Components.Layout
+
+<style>
+    .card-img-top {
+        width: 416px;
+        height: 200px;
+        object-fit: cover;
+        object-position: center;
+    }
+</style>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container-fluid">
+        <!-- Logo ganz links -->
+        <a class="navbar-brand fw-bold" href="/">BulkBase</a>
+
+        <!-- Zentrierte Navigation -->
+        <div class="mx-auto">
+            <ul class="navbar-nav flex-row gap-4">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/products">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Sign In</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Warenkorb ganz rechts -->
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <a class="nav-link position-relative" href="/cart">
+                    <img src="images/warenkorb.jpg" alt="Cart" style="height: 28px;" />
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
 
 <h1 class="text-center fw-bold fs-1 mb-5">Willkommen bei BulkBase</h1>
 <div class="container">
@@ -33,6 +78,43 @@
     </div>
 </div>
 
+<section>
+    <h2 class="fs-4 mb-3"><span style="color:#C30017;">▌</span> Our Products</h2>
+    <h3 class="fs-2 fw-bold mb-4">Explore Our Products</h3>
+
+    @if (products == null)
+    {
+        <p>Loading products...</p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var product in showAll ? products : products.Take(3))
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="@product.Image" class="card-img-top" alt="@product.Name">
+                        <div class="card-body">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text">@product.Description</p>
+                            <p class="fw-bold">@product.Price.ToString("0.00") €</p>
+                            <button class="btn text-white w-100" style="background-color:#C30017;"
+                                    @onclick="() => NavigateToProduct(product.ProductId)">View Product</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (!showAll)
+    {
+        <div class="text-center mt-4">
+            <button class="btn btn-outline-dark px-5" @onclick="OnViewAllClicked">View All Products</button>
+        </div>
+    }
+</section>
+
 <!-- Footer -->
 <div class="row text-center mt-5 py-5 text-white" style="background-color: #000;">
     <div class="col-md-4">
@@ -55,6 +137,25 @@
 @code {
 private void GoToProducts()
 {
-Navigation.NavigateTo("/productoverview");
+Navigation.NavigateTo("/products");
 }
+}
+@code {
+    private List<Product>? products;
+    private bool showAll = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Db.Products.ToListAsync();
+    }
+
+    private async Task OnViewAllClicked()
+    {
+        Navigation.NavigateTo("/products");
+    }
+
+    private void NavigateToProduct(int productId)
+    {
+        Navigation.NavigateTo($"/product/{productId}");
+    }
 }
