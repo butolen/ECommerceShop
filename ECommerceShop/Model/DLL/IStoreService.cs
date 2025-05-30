@@ -25,7 +25,7 @@ public interface IStoreService
     bool DeleteUser(string username);
 
     // Warenkorb
-    void AddToCart(string username, int productId, int quantity);
+    bool AddToCart(string username, int productId, int quantity);
     void RemoveFromCart(string username, int productId);
     void ChangeQuantity(string username, int productId, int newQuantity);
     void CompletePurchase(string username);

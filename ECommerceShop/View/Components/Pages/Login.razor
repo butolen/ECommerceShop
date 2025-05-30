@@ -9,6 +9,7 @@
 @inject NavigationManager Navigation
 @inject SessionState Session
 @inject LocalStorageService LocalStorage
+
 <style>
     body {
         background-color: white;
@@ -105,25 +106,21 @@
             <input type="text" @bind="username" class="form-input" placeholder="Name" required />
 
             <button type="submit" class="form-button">Anmelden</button>
-            <button type="button" class="form-button-register" 
-                    @onclick="HandleRegister" >
-                Registrieren
-            </button>
-
+            <button type="button" class="form-button-register" @onclick="HandleRegister">Registrieren</button>
         </form>
-        
+
         @if (!string.IsNullOrEmpty(message))
         {
-            <p class="text-center mt-3" style="color: green;">@message</p>
+            <p class="text-center mt-3 text-danger">@message</p>
         }
     </div>
 </div>
 
 @code {
-    private string email;
-    private string password;
-    private string username;
-    private string message;
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string username = string.Empty;
+    private string message = string.Empty;
     private bool _hasRedirected = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -138,7 +135,7 @@
             if (!string.IsNullOrEmpty(storedUsername) && !string.IsNullOrEmpty(storedRole))
             {
                 if (storedRole == "admin")
-                    Navigation.NavigateTo("/admin", forceLoad: true);
+                    Navigation.NavigateTo("/Admin", forceLoad: true);
                 else
                     Navigation.NavigateTo("/", forceLoad: true);
             }
@@ -151,11 +148,7 @@
         if (success)
         {
             await LocalStorage.SetUserData(username, email, role);
-
-            if (role == "admin")
-                Navigation.NavigateTo("/admin", forceLoad: true);
-            else
-                Navigation.NavigateTo("/", forceLoad: true);
+            Navigation.NavigateTo(role == "admin" ? "/Admin" : "/", forceLoad: true);
         }
         else
         {
@@ -165,94 +158,21 @@
 
     private void HandleRegister()
     {
-        string registerMessage;
-        bool registered = StoreService.RegisterUser(email, username, password, out registerMessage);
-        message = registerMessage;
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            message = "Bitte fülle alle Felder korrekt aus.";
+            return;
+        }
+
+        try
+        {
+            string registerMessage;
+            bool registered = StoreService.RegisterUser(email.Trim(), username.Trim(), password.Trim(), out registerMessage);
+            message = registered ? $" {registerMessage}" : $"Registrierung fehlgeschlagen: {registerMessage}";
+        }
+        catch (Exception ex)
+        {
+            message = $"Ein Fehler ist aufgetreten: {ex.Message}";
+        }
     }
 }
-
-
-
-
-
-@*
-@page "/login"
-@rendermode InteractiveServer
-@using ECommerceShop.Configurations
-@using ECommerceShop.DLL
-@using ECommerceShop.Entities
-@inject ShopContext Db
-@inject IStoreService StoreService
-@inject NavigationManager Navigation
-
-<div class="min-h-screen flex items-center justify-center bg-gray-50">
-    <div class="bg-white p-8 rounded shadow-md w-96 text-center">
-        <h1 class="text-3xl font-bold mb-2">BulkBase</h1>
-        <p class="text-sm mb-6">Login/Registrieren</p>
-
-        <form @onsubmit="HandleLogin">
-            <div class="mb-4">
-                <label class="block text-left text-sm font-medium mb-1">Email</label>
-                <input type="email" @bind="email" placeholder="max@muster.at"
-                       class="w-full px-3 py-2 border border-gray-300 rounded" required />
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-left text-sm font-medium mb-1">Username</label>
-                <input type="text" @bind="username" placeholder="user"
-                       class="w-full px-3 py-2 border border-gray-300 rounded" required />
-            </div>
-
-            <div class="mb-8">
-                <label class="block text-left text-sm font-medium mb-1">Password</label>
-                <input type="password" @bind="password" placeholder="********"
-                       class="w-full px-3 py-2 border border-gray-300 rounded" required />
-            </div>
-
-            <button type="submit" class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
-                Sign In
-            </button>
-
-            <button type="button" class="w-full mt-2 bg-gray-200 text-black py-2 rounded hover:bg-gray-300"
-                    @onclick="HandleRegister">
-                Register
-            </button>
-        </form>
-
-        @if (!string.IsNullOrEmpty(message))
-        {
-            <p class="text-green-600 mt-4">@message</p>
-        }
-    </div>
-</div>
-
-@code {
-    private string email;
-    private string password;
-    private string username;
-    private string message;
-
-    private async Task HandleLogin()
-    {
-        string role;
-        bool success = StoreService.Login(email, username, password, out role);
-
-        if (success)
-        {
-            message = $"Login Erfolgreich";
-            // Navigation logic folgt später
-        }
-        else
-        {
-            message = "Login fehlgeschlagen. Falsche Daten";
-        }
-    }
-
-    private void HandleRegister()
-    {
-        string registerMessage;
-        bool registered = StoreService.RegisterUser(email, username, password, out registerMessage);
-        message = registerMessage;
-    }
-}
-*@

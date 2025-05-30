@@ -173,7 +173,21 @@ Navigation.NavigateTo("/products");
 @code {
     private List<Product>? products;
     private bool showAll = false;
+    private bool _initialized = false;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            _initialized = true;
 
+            var username = await LocalStorage.GetUsername();
+            if (string.IsNullOrEmpty(username))
+            {
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
+        }
+    }
+    
     protected override async Task OnInitializedAsync()
     {
         products = await Db.Products.ToListAsync();

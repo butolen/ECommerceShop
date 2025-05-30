@@ -18,7 +18,7 @@ namespace ECommerceShop.DLL
             _session = session;
         }
         
-        public void AddToCart(string username, int productId, int quantity)
+        public bool AddToCart(string username, int productId, int quantity)
         {
             // Produkt und Benutzer holen
             var product = _context.Products.FirstOrDefault(p => p.ProductId == productId);
@@ -27,7 +27,7 @@ namespace ECommerceShop.DLL
             if (product == null || user == null)
             {
                 Console.WriteLine("Produkt oder Benutzer nicht gefunden.");
-                return;
+                return false;
             }
 
             // Bereits im Warenkorb befindliche Menge
@@ -41,7 +41,7 @@ namespace ECommerceShop.DLL
             if (product.InStock< totalRequested)
             {
                 Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
-                return;
+                return false;
             }
 
             if (existingItem != null)
@@ -58,9 +58,11 @@ namespace ECommerceShop.DLL
                 };
 
                 _context.OrderItems.Add(newItem);
+                
             }
 
             _context.SaveChanges();
+            return true;
         }
         
         public List<OrderItem> GetItemsByUser(string username)
@@ -117,6 +119,7 @@ namespace ECommerceShop.DLL
                 Username = username,
                 Email = email,
                 Password = password,
+                Address = ""
               
             };
 
