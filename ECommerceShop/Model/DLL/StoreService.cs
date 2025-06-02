@@ -259,6 +259,7 @@ namespace ECommerceShop.DLL
             if (existingReview != null)
             {
                 existingReview.Rating = rating;
+                existingReview.Text = comment; // ✅ HINZUGEFÜGT
                 _context.Update(existingReview);
             }
             else
@@ -275,6 +276,12 @@ namespace ECommerceShop.DLL
             }
 
             _context.SaveChanges();
+        }
+        public List<Review> GetReviewsForProduct(int productId)
+        {
+            return _context.Reviews
+                .Where(r => r.ProductId == productId)
+                .ToList();
         }
     }
 }

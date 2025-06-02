@@ -32,4 +32,5 @@ public interface IStoreService
 
     // Bewertung
     void WriteReview(string username, int productId, int rating, string comment);
+    List<Review> GetReviewsForProduct(int productId);
 }
