@@ -79,7 +79,7 @@ namespace ECommerceShop.DLL
             var user = _context.Users.SingleOrDefault(u => u.Email == email && u.Password == password && u.Username == userName);
             if (user != null)
             {
-                role = "User";
+                role = "user";
                 _session.Username = user.Username;
                 _session.Role = role;
                 return true;
@@ -88,7 +88,7 @@ namespace ECommerceShop.DLL
             var admin = _context.Administrators.SingleOrDefault(a => a.Email == email && a.Password == password && a.Username == userName);
             if (admin != null)
             {
-                role = "Admin";
+                role = "admin";
                 _session.Username = admin.Username;
                 _session.Role = role;
                 return true;

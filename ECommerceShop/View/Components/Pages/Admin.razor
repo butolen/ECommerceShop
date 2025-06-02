@@ -8,6 +8,7 @@
 @inject SessionState Session
 @inject LocalStorageService LocalStorage
 @inject NavigationManager Navigation
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
     <div class="container-fluid d-flex justify-content-between align-items-center">
 
@@ -18,19 +19,20 @@
 
         <!-- Navigation Buttons -->
         <div class="d-flex align-items-center gap-2">
-            <a class="nav-link custom-nav-link" href="/">Home</a>
-            <a class="nav-link custom-nav-link" href="/products">Products</a>
+            <a class="nav-link custom-nav-link" href="/">Start</a>
+            <a class="nav-link custom-nav-link" href="/products">Produkte</a>
         </div>
 
         <!-- Sign Out + Cart -->
         <div class="d-flex align-items-center gap-3">
-            <button class="btn logout-btn fw-semibold" @onclick="Logout">Sign Out</button>
+            <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
             <a class="nav-link position-relative" href="/cart">
                 <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
             </a>
         </div>
     </div>
 </nav>
+
 <style>
     .custom-nav-link {
         color: black;
@@ -183,6 +185,13 @@
             if (string.IsNullOrEmpty(username))
             {
                 Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            var role = await LocalStorage.GetRole();
+            if (!string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase))
+            {
+                Navigation.NavigateTo("/", forceLoad: true);
             }
         }
     }

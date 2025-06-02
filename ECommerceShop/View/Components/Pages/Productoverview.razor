@@ -106,6 +106,26 @@
     <!-- Produkte -->
     <section>
         <h2 class="fs-4 mb-3"><span style="color:#C30017;">▌</span> Unsere Produkte</h2>
+        <div class="mb-4">
+            <div class="input-group mb-3" style="max-width: 400px;">
+                <input type="text" class="form-control" placeholder="Produktname suchen..."
+                       @bind="searchTerm" @bind:event="oninput" />
+                <button class="btn btn-outline-secondary" @onclick="SearchProducts">🔍</button>
+                <button class="btn btn-outline-danger" @onclick="ClearSearch">✖</button>
+            </div>
+
+            <div class="d-flex gap-3 flex-wrap mb-2">
+                @foreach (var category in categoryFilters.Keys)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="@category"
+                               checked="@CategoryValue(category)"
+                               @onchange="async e => await SetCategory(category, ((ChangeEventArgs)e).Value is bool b && b)" />
+                        <label class="form-check-label" for="@category">@category</label>
+                    </div>
+                }
+            </div>
+        </div>
         <h3 class="fs-2 fw-bold mb-4">Entdecke die Welt des Sports</h3>
 
         @if (products == null)
@@ -166,46 +186,100 @@
 </div>
 
 @code {
-private List<Product>? products;
-private bool showAll = true;
-private bool _initialized = false;
+    private List<Product>? products;
+    private bool showAll = true;
+    private bool _initialized = false;
+    private string searchTerm = "";
 
-protected override async Task OnAfterRenderAsync(bool firstRender)
-{
-    if (firstRender && !_initialized)
+    // Kategorie-Checkboxen
+    private Dictionary<string, bool> categoryFilters = new()
     {
-        _initialized = true;
+        { "Hanteln", false },
+        { "Geräte", false },
+        { "Zubehör", false }
+    };
 
-        var username = await LocalStorage.GetUsername();
-        if (string.IsNullOrEmpty(username))
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
         {
-            Navigation.NavigateTo("/login", forceLoad: true);
+            _initialized = true;
+
+            var username = await LocalStorage.GetUsername();
+            if (string.IsNullOrEmpty(username))
+            {
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
         }
     }
-}
-protected override async Task OnInitializedAsync()
-{
-products = await Db.Products.ToListAsync();
-}
 
-private async Task OnViewAllClicked()
-{
-showAll = true;
-await Task.Yield();
-}
-
-private void NavigateToProduct(int productId)
-{
-Navigation.NavigateTo($"/product/{productId}");
-}
-private async Task AddToCart(Product product)
-{
-    var username = await LocalStorage.GetUsername();
-    var success = Ss.AddToCart(username, product.ProductId, 1);
-    if (!success)
+    protected override async Task OnInitializedAsync()
     {
-        // Optional: Anzeige eines Fehlers, Toast, Alert oder ähnliches
-        Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
+        products = await Db.Products.ToListAsync();
     }
-}
+
+    private void OnViewAllClicked()
+    {
+        showAll = true;
+    }
+
+    private void NavigateToProduct(int productId)
+    {
+        Navigation.NavigateTo($"/product/{productId}");
+    }
+
+    private async Task AddToCart(Product product)
+    {
+        var username = await LocalStorage.GetUsername();
+        var success = Ss.AddToCart(username, product.ProductId, 1);
+        if (!success)
+        {
+            Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
+        }
+    }
+
+    private async Task SearchProducts()
+    {
+        // 1. Alle Produkte holen
+        var allProducts = await Db.Products.ToListAsync();
+
+        // 2. Nach Name filtern, wenn eingegeben
+        IEnumerable<Product> filtered = allProducts;
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filtered = filtered.Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // 3. Nach Kategorie filtern, wenn Checkbox(en) aktiv
+        var selectedCategories = categoryFilters
+            .Where(c => c.Value)
+            .Select(c => c.Key)
+            .ToList();
+
+        if (selectedCategories.Any())
+        {
+            filtered = filtered.Where(p => selectedCategories.Contains(p.Category, StringComparer.OrdinalIgnoreCase));
+        }
+
+        // 4. Ergebnis setzen
+        products = filtered.ToList();
+    }
+    
+    private async Task ClearSearch()
+    {
+        searchTerm = "";
+        await SearchProducts(); // wende Filter mit leerem Suchtext an
+    }
+    // Getter für Checkbox-Zustand
+    private bool CategoryValue(string key)
+    {
+        return categoryFilters[key];
+    }
+
+    // Setter mit Live-Filterung
+    private async Task SetCategory(string key, bool value)
+    {
+        categoryFilters[key] = value;
+        await SearchProducts();
+    }
 }
