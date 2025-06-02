@@ -1,5 +1,7 @@
 DELETE FROM products;
 ALTER TABLE products MODIFY price DECIMAL(10,2);
+ALTER TABLE users
+    MODIFY address VARCHAR(255) NULL;
 INSERT INTO products (name, price, category, instock, image, description)
 VALUES
     ('Hexagon Hantel Set', 799.00, 'Hanteln', 35, 'images/hexagon_hantel.jpg', 'Solide Gummi-Hanteln mit Hex-Form für sicheres Training.'),

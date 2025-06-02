@@ -158,21 +158,8 @@
 
     private void HandleRegister()
     {
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-        {
-            message = "Bitte fülle alle Felder korrekt aus.";
-            return;
-        }
-
-        try
-        {
-            string registerMessage;
-            bool registered = StoreService.RegisterUser(email.Trim(), username.Trim(), password.Trim(), out registerMessage);
-            message = registered ? $" {registerMessage}" : $"Registrierung fehlgeschlagen: {registerMessage}";
-        }
-        catch (Exception ex)
-        {
-            message = $"Ein Fehler ist aufgetreten: {ex.Message}";
-        }
+        string registerMessage;
+        bool registered = StoreService.RegisterUser(email, username, password, out registerMessage);
+        message = registerMessage;
     }
 }

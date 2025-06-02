@@ -119,7 +119,6 @@ namespace ECommerceShop.DLL
                 Username = username,
                 Email = email,
                 Password = password,
-                Address = ""
               
             };
 
@@ -129,7 +128,6 @@ namespace ECommerceShop.DLL
             message = "Registrierung erfolgreich!";
             return true;
         }
-
         public string GetUserRole(string email)
         {
             if (_context.Users.Any(u => u.Email == email)) return "User";
