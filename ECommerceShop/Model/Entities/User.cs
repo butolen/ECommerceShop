@@ -15,7 +15,7 @@ public class User
     [Required]
     public string Email { get; set; }
 
-    [Column("password", TypeName = "VARCHAR(15)")]
+    [Column("password", TypeName = "VARCHAR(200)")]
     [Required]
     public string Password { get; set; }
 

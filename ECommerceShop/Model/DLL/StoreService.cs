@@ -78,8 +78,11 @@ namespace ECommerceShop.DLL
         {
             role = null;
 
-            var user = _context.Users.SingleOrDefault(u => u.Email == email && u.Password == password && u.Username == userName);
-            if (user != null)
+            // Zuerst normalen Benutzer prüfen
+            var user = _context.Users
+                .FirstOrDefault(u => u.Email == email && u.Username == userName);
+
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
                 role = "user";
                 _session.Username = user.Username;
@@ -87,8 +90,11 @@ namespace ECommerceShop.DLL
                 return true;
             }
 
-            var admin = _context.Administrators.SingleOrDefault(a => a.Email == email && a.Password == password && a.Username == userName);
-            if (admin != null)
+            // Dann Admin prüfen
+            var admin = _context.Administrators
+                .FirstOrDefault(a => a.Email == email && a.Username == userName);
+
+            if (admin != null && BCrypt.Net.BCrypt.Verify(password, admin.Password))
             {
                 role = "admin";
                 _session.Username = admin.Username;
@@ -96,7 +102,7 @@ namespace ECommerceShop.DLL
                 return true;
             }
 
-            Console.WriteLine("nicht gefunden");
+            Console.WriteLine("Login fehlgeschlagen.");
             return false;
         }
         
@@ -104,25 +110,24 @@ namespace ECommerceShop.DLL
         {
             message = null;
 
-            // Prüfen, ob die E-Mail bereits in Users vorhanden ist
+            // E-Mail doppelt?
             bool emailExistsInUsers = _context.Users.Any(u => u.Email == email);
-
-            // Prüfen, ob die E-Mail bereits in Admins vorhanden ist
             bool emailExistsInAdmins = _context.Administrators.Any(a => a.Email == email);
 
             if (emailExistsInUsers || emailExistsInAdmins)
             {
-                message = "Registrierung nicht möglich: Diese E-Mail ist bereits vergeben";
+                message = "Registrierung nicht möglich: Diese E-Mail ist bereits vergeben.";
                 return false;
             }
 
-            // Neuen Benutzer erstellen (ohne Adresse)
+            // Passwort hashen
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
             var newUser = new User
             {
                 Username = username,
                 Email = email,
-                Password = password,
-              
+                Password = hashedPassword
             };
 
             _context.Users.Add(newUser);
