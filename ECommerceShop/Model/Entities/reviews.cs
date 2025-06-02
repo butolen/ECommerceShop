@@ -19,6 +19,10 @@ public class Review
     public int ProductId { get; set; }
     public Product Product { get; set; }
 
+    [StringLength(50)]
+    [Column("text",TypeName = "VARCHAR(200)")]
+    public string Text { get; set; }
+    
     [Required]
     [StringLength(50)]
     [Column("username")]

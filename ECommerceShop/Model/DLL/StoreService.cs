@@ -267,8 +267,8 @@ namespace ECommerceShop.DLL
                 {
                     Username = username,
                     ProductId = productId,
-                    Rating = rating
-                    // Butoleon Mathias
+                    Rating = rating,
+                    Text = comment
                 };
 
                 _context.Reviews.Add(review);

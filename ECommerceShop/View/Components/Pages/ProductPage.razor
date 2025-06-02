@@ -127,6 +127,29 @@ else
             </div>
         </div>
     </div>
+    @if (product != null)
+    {
+        <div class="container mt-5">
+            <h3>Produkt bewerten</h3>
+
+            @if (!string.IsNullOrEmpty(ReviewMessage))
+            {
+                <div class="alert alert-info">@ReviewMessage</div>
+            }
+
+            <div class="mb-3" style="max-width: 400px;">
+                <label class="form-label">Sternebewertung (1–5):</label>
+                <input type="number" class="form-control" min="1" max="5" @bind="rating" />
+            </div>
+
+            <div class="mb-3" style="max-width: 600px;">
+                <label class="form-label">Kommentar:</label>
+                <textarea class="form-control" rows="4" @bind="comment"></textarea>
+            </div>
+
+            <button class="btn btn-primary" @onclick="SubmitReview">Review absenden</button>
+        </div>
+    }
 }
 
 @code {
@@ -148,6 +171,32 @@ else
             {
                 Navigation.NavigateTo("/login", forceLoad: true);
             }
+        }
+    }
+    private int rating = 5;
+    private string comment = string.Empty;
+    private string ReviewMessage = "";
+
+    private async Task SubmitReview()
+    {
+        if (product == null || rating < 1 || rating > 5)
+        {
+            ReviewMessage = "Bitte eine Bewertung zwischen 1 und 5 Sternen abgeben.";
+            return;
+        }
+
+        var username = await LocalStorage.GetUsername();
+
+        try
+        {
+            Ss.WriteReview(username, product.ProductId, rating, comment);
+            ReviewMessage = "Danke für dein Feedback!";
+            comment = "";
+            rating = 5;
+        }
+        catch (Exception ex)
+        {
+            ReviewMessage = "Fehler beim Speichern der Bewertung: " + ex.Message;
         }
     }
     protected override async Task OnInitializedAsync()
