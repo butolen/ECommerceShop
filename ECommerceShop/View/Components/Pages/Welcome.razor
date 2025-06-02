@@ -4,10 +4,8 @@
 @inject ShopContext Db
 @inject NavigationManager Navigation
 @inject LocalStorageService LocalStorage
-@inject IStoreService Ss
 
 @using ECommerceShop.Configurations
-@using ECommerceShop.DLL
 @using ECommerceShop.Entities
 @using Microsoft.EntityFrameworkCore
 @using View.Components.Layout
@@ -125,10 +123,6 @@
                             <p class="fw-bold">@product.Price.ToString("0.00") €</p>
                             <button class="btn text-white w-100" style="background-color:#C30017;"
                                     @onclick="() => NavigateToProduct(product.ProductId)">Zum Produkt</button>
-                            <button class="btn btn-outline-dark w-100 mt-2"
-                                    @onclick="() => AddToCart(product)">
-                                In den Warenkorb
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -179,21 +173,7 @@ Navigation.NavigateTo("/products");
 @code {
     private List<Product>? products;
     private bool showAll = false;
-    private bool _initialized = false;
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_initialized)
-        {
-            _initialized = true;
 
-            var username = await LocalStorage.GetUsername();
-            if (string.IsNullOrEmpty(username))
-            {
-                Navigation.NavigateTo("/login", forceLoad: true);
-            }
-        }
-    }
-    
     protected override async Task OnInitializedAsync()
     {
         products = await Db.Products.ToListAsync();
@@ -207,15 +187,5 @@ Navigation.NavigateTo("/products");
     private void NavigateToProduct(int productId)
     {
         Navigation.NavigateTo($"/product/{productId}");
-    }
-    private async Task AddToCart(Product product)
-    {
-        var username = await LocalStorage.GetUsername();
-        var success = Ss.AddToCart(username, product.ProductId, 1);
-        if (!success)
-        {
-            // Optional: Anzeige eines Fehlers, Toast, Alert oder ähnliches
-            Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
-        }
     }
 }
