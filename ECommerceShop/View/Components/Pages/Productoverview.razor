@@ -114,18 +114,36 @@
                 <button class="btn btn-outline-danger" @onclick="ClearSearch">✖</button>
             </div>
 
+            <!-- Kategorie Checkboxen -->
             <div class="d-flex gap-3 flex-wrap mb-2">
                 @foreach (var category in categoryFilters.Keys)
                 {
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="@category"
-                               checked="@CategoryValue(category)"
-                               @onchange="async e => await SetCategory(category, ((ChangeEventArgs)e).Value is bool b && b)" />
-                        <label class="form-check-label" for="@category">@category</label>
-                    </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="@category"
+                           checked="@CategoryValue(category)"
+                           @onchange="async e => await SetCategory(category, ((ChangeEventArgs)e).Value is bool b && b)" />
+                    <label class="form-check-label" for="@category">@category</label>
+                </div>
                 }
             </div>
+
+            <!-- Preisfilter -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Preis</label>
+                <div class="d-flex gap-2" style="max-width: 300px;">
+                    <!-- Preisfilter -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Preis</label>
+                        <div class="d-flex gap-2" style="max-width: 300px;">
+                            <input type="number" class="form-control" placeholder="von" @bind="priceFrom" />
+                            <input type="number" class="form-control" placeholder="bis" @bind="priceTo" />
+                            <button class="btn btn-outline-secondary" @onclick="SearchProducts">🔍</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
         <h3 class="fs-2 fw-bold mb-4">Entdecke die Welt des Sports</h3>
 
         @if (products == null)
@@ -164,6 +182,7 @@
         </div>
         }
     </section>
+
 </div>
 
 <!-- Footer -->
@@ -187,99 +206,114 @@
 
 @code {
     private List<Product>? products;
-    private bool showAll = true;
-    private bool _initialized = false;
-    private string searchTerm = "";
+private bool showAll = true;
+private bool _initialized = false;
+private string searchTerm = "";
 
-    // Kategorie-Checkboxen
-    private Dictionary<string, bool> categoryFilters = new()
+// Preisfilter
+private decimal? priceFrom;
+private decimal? priceTo;
+
+// Kategorie-Checkboxen
+private Dictionary<string, bool> categoryFilters = new()
+{
+    { "Hanteln", false },
+    { "Geräte", false },
+    { "Zubehör", false }
+};
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender && !_initialized)
     {
-        { "Hanteln", false },
-        { "Geräte", false },
-        { "Zubehör", false }
-    };
+        _initialized = true;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_initialized)
-        {
-            _initialized = true;
-
-            var username = await LocalStorage.GetUsername();
-            if (string.IsNullOrEmpty(username))
-            {
-                Navigation.NavigateTo("/login", forceLoad: true);
-            }
-        }
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        products = await Db.Products.ToListAsync();
-    }
-
-    private void OnViewAllClicked()
-    {
-        showAll = true;
-    }
-
-    private void NavigateToProduct(int productId)
-    {
-        Navigation.NavigateTo($"/product/{productId}");
-    }
-
-    private async Task AddToCart(Product product)
-    {
         var username = await LocalStorage.GetUsername();
-        var success = Ss.AddToCart(username, product.ProductId, 1);
-        if (!success)
+        if (string.IsNullOrEmpty(username))
         {
-            Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
+            Navigation.NavigateTo("/login", forceLoad: true);
         }
     }
+}
 
-    private async Task SearchProducts()
+protected override async Task OnInitializedAsync()
+{
+    products = await Db.Products.ToListAsync();
+}
+
+private void OnViewAllClicked()
+{
+    showAll = true;
+}
+
+private void NavigateToProduct(int productId)
+{
+    Navigation.NavigateTo($"/product/{productId}");
+}
+
+private async Task AddToCart(Product product)
+{
+    var username = await LocalStorage.GetUsername();
+    var success = Ss.AddToCart(username, product.ProductId, 1);
+    if (!success)
     {
-        // 1. Alle Produkte holen
-        var allProducts = await Db.Products.ToListAsync();
-
-        // 2. Nach Name filtern, wenn eingegeben
-        IEnumerable<Product> filtered = allProducts;
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            filtered = filtered.Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-        }
-
-        // 3. Nach Kategorie filtern, wenn Checkbox(en) aktiv
-        var selectedCategories = categoryFilters
-            .Where(c => c.Value)
-            .Select(c => c.Key)
-            .ToList();
-
-        if (selectedCategories.Any())
-        {
-            filtered = filtered.Where(p => selectedCategories.Contains(p.Category, StringComparer.OrdinalIgnoreCase));
-        }
-
-        // 4. Ergebnis setzen
-        products = filtered.ToList();
+        Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
     }
-    
-    private async Task ClearSearch()
+}
+
+private async Task SearchProducts()
+{
+    // 1. Alle Produkte holen
+    var allProducts = await Db.Products.ToListAsync();
+
+    // 2. Nach Name filtern
+    IEnumerable<Product> filtered = allProducts;
+    if (!string.IsNullOrWhiteSpace(searchTerm))
     {
-        searchTerm = "";
-        await SearchProducts(); // wende Filter mit leerem Suchtext an
-    }
-    // Getter für Checkbox-Zustand
-    private bool CategoryValue(string key)
-    {
-        return categoryFilters[key];
+        filtered = filtered.Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
     }
 
-    // Setter mit Live-Filterung
-    private async Task SetCategory(string key, bool value)
+    // 3. Kategorie-Filter
+    var selectedCategories = categoryFilters
+        .Where(c => c.Value)
+        .Select(c => c.Key)
+        .ToList();
+
+    if (selectedCategories.Any())
     {
-        categoryFilters[key] = value;
-        await SearchProducts();
+        filtered = filtered.Where(p => selectedCategories.Contains(p.Category, StringComparer.OrdinalIgnoreCase));
     }
+
+    // 4. Preisfilter anwenden
+    if (priceFrom.HasValue)
+    {
+        filtered = filtered.Where(p => p.Price >= priceFrom.Value);
+    }
+    if (priceTo.HasValue)
+    {
+        filtered = filtered.Where(p => p.Price <= priceTo.Value);
+    }
+
+
+    // 5. Ergebnis setzen
+    products = filtered.ToList();
+}
+
+private async Task ClearSearch()
+{
+    searchTerm = "";
+    await SearchProducts();
+}
+
+private bool CategoryValue(string key)
+{
+    return categoryFilters[key];
+}
+
+private async Task SetCategory(string key, bool value)
+{
+    categoryFilters[key] = value;
+    await SearchProducts();
+}
+
 }

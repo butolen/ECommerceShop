@@ -30,20 +30,24 @@ namespace ECommerceShop.DLL
                 return false;
             }
 
-            // Bereits im Warenkorb befindliche Menge
+            // Bereits vorhandenes Item im Warenkorb prüfen
             var existingItem = _context.OrderItems
                 .FirstOrDefault(o => o.Username == username && o.ProductId == productId);
 
             int existingQuantity = existingItem?.QuantityOrdered ?? 0;
-            int totalRequested = existingQuantity + quantity;
 
-            // Verfügbarkeit prüfen
-            if (product.InStock< totalRequested)
+            // Debug-Ausgabe zur Analyse
+            Console.WriteLine($"[DEBUG] InStock: {product.InStock}, ExistingInCart: {existingQuantity}, NewRequest: {quantity}");
+
+            // Verfügbarkeit korrekt prüfen (verfügbarer Rest muss ≥ neue Menge sein)
+            int verbleibend = product.InStock - existingQuantity;
+            if (quantity > verbleibend)
             {
                 Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
                 return false;
             }
 
+            // Item aktualisieren oder neu hinzufügen
             if (existingItem != null)
             {
                 existingItem.QuantityOrdered += quantity;
@@ -56,9 +60,7 @@ namespace ECommerceShop.DLL
                     ProductId = productId,
                     QuantityOrdered = quantity
                 };
-
                 _context.OrderItems.Add(newItem);
-                
             }
 
             _context.SaveChanges();
@@ -94,6 +96,7 @@ namespace ECommerceShop.DLL
                 return true;
             }
 
+            Console.WriteLine("nicht gefunden");
             return false;
         }
         
