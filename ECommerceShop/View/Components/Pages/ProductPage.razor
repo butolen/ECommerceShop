@@ -45,19 +45,15 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-
-        <!-- Logo -->
         <a class="navbar-brand fw-bold fs-3 text-dark" href="/" style="margin-right: 30px;">
             BulkBase
         </a>
 
-        <!-- Navigation Buttons -->
         <div class="d-flex align-items-center gap-2">
             <a class="nav-link custom-nav-link" href="/">Start</a>
             <a class="nav-link custom-nav-link" href="/products">Produkte</a>
         </div>
 
-        <!-- Sign Out + Cart -->
         <div class="d-flex align-items-center gap-3">
             <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
             <a class="nav-link position-relative" href="/cart">
@@ -82,41 +78,44 @@ else
 {
     <div class="container mt-5">
         <div class="row">
-            <!-- Bildervorschau -->
             <div class="col-md-2 d-none d-md-block">
                 <img src="@product.Image" class="img-thumbnail mb-3" />
                 <img src="@product.Image" class="img-thumbnail mb-3" />
                 <img src="@product.Image" class="img-thumbnail mb-3" />
             </div>
 
-            <!-- Hauptbild -->
             <div class="col-md-5 text-center mb-4 mb-md-0">
                 <img src="@product.Image" class="img-fluid" style="max-height: 350px;" />
             </div>
 
-            <!-- Produktdetails -->
             <div class="col-md-5">
                 <h2>@product.Name</h2>
-                <div class="text-warning mb-2">
-                    ★★★★☆ <span class="text-muted">(50 Reviews)</span>
-                </div>
+
+                @if (productReviews.Count > 0)
+                {
+                    <div class="text-warning mb-2">
+                        ⭑ @avgRating.ToString("0.0") <span class="text-muted">(@productReviews.Count Bewertungen)</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted mb-2">Noch keine Bewertungen</div>
+                }
+
                 <p class="fs-4 fw-bold">@product.Price.ToString("0.00")€</p>
                 <p>@product.Description</p>
 
-                <p class="text-success fw-bold">✔ Lagernd</p>
+                <p class="@GetStockClass() fw-bold">@GetStockMessage()</p>
                 <p>Noch verfügbar: @product.InStock</p>
 
-                <!-- Menge -->
                 <div class="input-group mb-3" style="width: 150px;">
                     <button class="btn btn-outline-secondary" @onclick="DecreaseQuantity">-</button>
                     <input type="text" class="form-control text-center" value="@quantity" readonly />
                     <button class="btn btn-outline-secondary" @onclick="IncreaseQuantity">+</button>
                 </div>
 
-                <!-- Add to Cart -->
                 <button class="btn text-white w-100 mb-3" style="background-color:#C30017;" @onclick="AddToCart">Zum Warenkorb hinzufügen</button>
 
-                <!-- Lieferung -->
                 <div class="border p-3">
                     <p><strong>🚚 Kostenlose Lieferung</strong></p>
                     <p>Postleitzahl eingeben für mehr Lieferdetails</p>
@@ -127,27 +126,48 @@ else
             </div>
         </div>
     </div>
-    @if (product != null)
+
+    <div class="container mt-5">
+        <h3>Produkt bewerten</h3>
+
+        @if (!string.IsNullOrEmpty(ReviewMessage))
+        {
+            <div class="alert alert-info">@ReviewMessage</div>
+        }
+
+        <div class="mb-3" style="max-width: 400px;">
+            <label class="form-label">Sternebewertung (1–5):</label>
+            <input type="number" class="form-control" min="1" max="5" @bind="rating" />
+        </div>
+
+        <div class="mb-3" style="max-width: 600px;">
+            <label class="form-label">Kommentar:</label>
+            <textarea class="form-control" rows="4" @bind="comment"></textarea>
+        </div>
+
+        <button class="btn btn-primary" @onclick="SubmitReview">Review absenden</button>
+    </div>
+
+    @if (productReviews.Count > 0)
     {
         <div class="container mt-5">
-            <h3>Produkt bewerten</h3>
-
-            @if (!string.IsNullOrEmpty(ReviewMessage))
+            <h4>Alle Bewertungen</h4>
+            @foreach (var r in productReviews)
             {
-                <div class="alert alert-info">@ReviewMessage</div>
+                <div class="card my-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Bewertung: @r.Rating ★</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">von @r.Username</h6>
+                        <p class="card-text">@r.Text</p>
+                    </div>
+                </div>
             }
-
-            <div class="mb-3" style="max-width: 400px;">
-                <label class="form-label">Sternebewertung (1–5):</label>
-                <input type="number" class="form-control" min="1" max="5" @bind="rating" />
-            </div>
-
-            <div class="mb-3" style="max-width: 600px;">
-                <label class="form-label">Kommentar:</label>
-                <textarea class="form-control" rows="4" @bind="comment"></textarea>
-            </div>
-
-            <button class="btn btn-primary" @onclick="SubmitReview">Review absenden</button>
+        </div>
+    }
+    else
+    {
+        <div class="container mt-5">
+            <p class="text-muted">Noch keine Bewertungen vorhanden.</p>
         </div>
     }
 }
@@ -159,13 +179,24 @@ else
     private Product? product;
     private int quantity = 1;
     private string ErrorMessage = string.Empty;
+    private int rating = 5;
+    private string comment = string.Empty;
+    private string ReviewMessage = "";
+    private List<Review> productReviews = new();
+    private double avgRating = 0.0;
     private bool _initialized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await Db.Products.FirstOrDefaultAsync(p => p.ProductId == ProductId);
+        await LoadReviews();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !_initialized)
         {
             _initialized = true;
-
             var username = await LocalStorage.GetUsername();
             if (string.IsNullOrEmpty(username))
             {
@@ -173,9 +204,15 @@ else
             }
         }
     }
-    private int rating = 5;
-    private string comment = string.Empty;
-    private string ReviewMessage = "";
+
+    private async Task LoadReviews()
+    {
+        if (product != null)
+        {
+            productReviews = Ss.GetReviewsForProduct(product.ProductId);
+            avgRating = productReviews.Count > 0 ? productReviews.Average(r => r.Rating) : 0.0;
+        }
+    }
 
     private async Task SubmitReview()
     {
@@ -193,21 +230,15 @@ else
             ReviewMessage = "Danke für dein Feedback!";
             comment = "";
             rating = 5;
+            await LoadReviews();
         }
         catch (Exception ex)
         {
             ReviewMessage = "Fehler beim Speichern der Bewertung: " + ex.Message;
         }
     }
-    protected override async Task OnInitializedAsync()
-    {
-        product = await Db.Products.FirstOrDefaultAsync(p => p.ProductId == ProductId);
-    }
 
-    private void IncreaseQuantity()
-    {
-        quantity++;
-    }
+    private void IncreaseQuantity() => quantity++;
 
     private void DecreaseQuantity()
     {
@@ -234,4 +265,10 @@ else
             }
         }
     }
+
+    private string GetStockMessage() =>
+        product != null && product.InStock > 0 ? "✔ Lagernd" : "❌ Nicht lagernd";
+
+    private string GetStockClass() =>
+        product != null && product.InStock > 0 ? "text-success" : "text-danger";
 }
