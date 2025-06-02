@@ -137,6 +137,7 @@ namespace ECommerceShop.DLL
             if (_context.Administrators.Any(a => a.Email == email)) return "Admin";
             return null;
         }
+        
 
         public List<Product> SearchByName(string name)
         {
@@ -280,11 +281,27 @@ namespace ECommerceShop.DLL
 
             _context.SaveChanges();
         }
-        public List<Review> GetReviewsForProduct(int productId)
+        /*public List<Review> GetReviewsForProduct(int productId)
         {
             return _context.Reviews
                 .Where(r => r.ProductId == productId)
                 .ToList();
+        }*/
+        public List<Review> GetReviewsForProduct(int productId)
+        {
+            var reviews = _context.Reviews
+                .Where(r => r.ProductId == productId)
+                .ToList();
+
+            Console.WriteLine($"[ReviewService] Produkt {productId}: {reviews.Count} Bewertungen gefunden");
+
+            foreach (var r in reviews)
+            {
+                Console.WriteLine($" - Bewertung: {r.Rating} Sterne, Text: {r.Text}, User: {r.Username}");
+            }
+
+            return reviews;
         }
+
     }
 }

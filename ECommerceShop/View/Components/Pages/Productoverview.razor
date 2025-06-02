@@ -129,7 +129,6 @@
 
             <!-- Preisfilter -->
             <div class="mb-4">
-                <label class="form-label fw-bold">Preis</label>
                 <div class="d-flex gap-2" style="max-width: 300px;">
                     <!-- Preisfilter -->
                     <div class="mb-4">
@@ -142,47 +141,74 @@
                     </div>
                 </div>
             </div>
+            <!-- Bewertungsfilter -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Mindestbewertung</label>
+                <div class="d-flex gap-3 flex-wrap">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="ratingFilter" id="rating@i"
+                               value="@i" checked="@(minRating == i)"
+                               @onchange="() => SetMinRating(i)" />
+                        <label class="form-check-label" for="rating@i">⭑ ab @i</label>
+                    </div>
+                    }
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="ratingFilter" id="rating0"
+                               value="0" checked="@(minRating == 0)"
+                               @onchange="() => SetMinRating(0)" />
+                        <label class="form-check-label" for="rating0">Alle</label>
+                    </div>
+                    <button class="btn btn-outline-secondary" @onclick="SearchProducts">🔍</button>
+                </div>
+            </div>
+
         </div>
 
         <h3 class="fs-2 fw-bold mb-4">Entdecke die Welt des Sports</h3>
 
         @if (products == null)
         {
-        <p>Loading products...</p>
+            <p>Produkte werden geladen...</p>
+        }
+        else if (!products.Any())
+        {
+            <p class="text-muted">Keine Produkte gefunden mit den aktuellen Filtern.</p>
         }
         else
         {
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            @foreach (var product in showAll ? products : products.Take(3))
-            {
-            <div class="col">
-                <div class="card h-100">
-                    <img src="@product.Image" class="card-img-top" alt="@product.Name">
-                    <div class="card-body">
-                        <h5 class="card-title">@product.Name</h5>
-                        <p class="card-text">@product.Description</p>
-                        <p class="fw-bold">@product.Price.ToString("0.00") €</p>
-                        <button class="btn text-white w-100" style="background-color:#C30017;"
-                                @onclick="() => NavigateToProduct(product.ProductId)">Zum Produkt</button>
-                        <button class="btn btn-outline-dark w-100 mt-2"
-                                @onclick="() => AddToCart(product)">
-                            In den Warenkorb
-                        </button>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                @foreach (var product in products)
+                {
+                    <div class="col">
+                        <div class="card h-100">
+                            <img src="@product.Image" class="card-img-top" alt="@product.Name">
+                            <div class="card-body">
+                                <h5 class="card-title">@product.Name</h5>
+                                <p class="card-text">@product.Description</p>
+                                <p class="fw-bold">@product.Price.ToString("0.00") €</p>
+                                <button class="btn text-white w-100" style="background-color:#C30017;"
+                                        @onclick="() => NavigateToProduct(product.ProductId)">Zum Produkt</button>
+                                <button class="btn btn-outline-dark w-100 mt-2"
+                                        @onclick="() => AddToCart(product)">
+                                    In den Warenkorb
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            }
+                }   
         </div>
         }
-
+        @*
         @if (!showAll)
         {
         <div class="text-center mt-4">
             <button class="btn btn-outline-dark px-5" @onclick="OnViewAllClicked">Zeige mehr</button>
         </div>
-        }
+        }*@
     </section>
-
 </div>
 
 <!-- Footer -->
@@ -205,10 +231,21 @@
 </div>
 
 @code {
+    
+    
+    private Dictionary<int, List<Review>> productReviewMap = new();
     private List<Product>? products;
 private bool showAll = true;
 private bool _initialized = false;
 private string searchTerm = "";
+private int minRating = 0;
+private async Task SetMinRating(int rating)
+{
+    minRating = rating;
+    await SearchProducts();
+}
+
+
 
 // Preisfilter
 private decimal? priceFrom;
@@ -238,7 +275,7 @@ protected override async Task OnAfterRenderAsync(bool firstRender)
 
 protected override async Task OnInitializedAsync()
 {
-    products = await Db.Products.ToListAsync();
+    await SearchProducts();
 }
 
 private void OnViewAllClicked()
@@ -263,17 +300,20 @@ private async Task AddToCart(Product product)
 
 private async Task SearchProducts()
 {
-    // 1. Alle Produkte holen
     var allProducts = await Db.Products.ToListAsync();
 
-    // 2. Nach Name filtern
-    IEnumerable<Product> filtered = allProducts;
+    productReviewMap = allProducts.ToDictionary(
+        p => p.ProductId,
+        p => Ss.GetReviewsForProduct(p.ProductId) ?? new List<Review>()
+    );
+
+    var filtered = allProducts.AsEnumerable();
+
     if (!string.IsNullOrWhiteSpace(searchTerm))
     {
         filtered = filtered.Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
     }
 
-    // 3. Kategorie-Filter
     var selectedCategories = categoryFilters
         .Where(c => c.Value)
         .Select(c => c.Key)
@@ -284,20 +324,37 @@ private async Task SearchProducts()
         filtered = filtered.Where(p => selectedCategories.Contains(p.Category, StringComparer.OrdinalIgnoreCase));
     }
 
-    // 4. Preisfilter anwenden
     if (priceFrom.HasValue)
     {
         filtered = filtered.Where(p => p.Price >= priceFrom.Value);
     }
+
     if (priceTo.HasValue)
     {
         filtered = filtered.Where(p => p.Price <= priceTo.Value);
     }
 
+    if (minRating > 0)
+    {
+        filtered = filtered.Where(p =>
+        {
+            var reviews = productReviewMap.TryGetValue(p.ProductId, out var r) ? r : new List<Review>();
+            var avg = reviews.Any() ? reviews.Average(x => x.Rating) : 0;
+            Console.WriteLine($"{p.Name} - Avg: {avg} ⭑");
+            return avg >= minRating;
+        });
+    }
 
-    // 5. Ergebnis setzen
     products = filtered.ToList();
+    foreach (var p in products)
+    {
+        Console.WriteLine($"Wird angezeigt: {p.Name}");
+    }
+
+    showAll = true;
 }
+
+
 
 private async Task ClearSearch()
 {
