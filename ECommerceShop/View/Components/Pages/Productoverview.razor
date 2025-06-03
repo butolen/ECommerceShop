@@ -56,6 +56,10 @@
         <div class="d-flex align-items-center gap-3">
             <a class="nav-link custom-nav-link" href="/">Start</a>
             <a class="nav-link custom-nav-link" href="/products">Produkte</a>
+            @if (role == "admin")
+            {
+                <a class="nav-link custom-nav-link" href="/Admin">Admin</a>
+            }
         </div>
         <div class="d-flex align-items-center gap-3">
             <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
@@ -188,6 +192,7 @@
     private decimal? priceFrom;
     private decimal? priceTo;
     private int? minRating = null;
+    private string? role;
 
     private Dictionary<string, bool> categoryFilters = new()
     {
@@ -204,8 +209,12 @@
         {
             _initialized = true;
             var username = await LocalStorage.GetUsername();
+            role = await LocalStorage.GetRole();
+
             if (string.IsNullOrEmpty(username))
                 Navigation.NavigateTo("/login", forceLoad: true);
+
+            StateHasChanged(); // WICHTIG: damit der Admin-Link angezeigt wird
         }
     }
 

@@ -49,13 +49,16 @@
         color: white;
     }
 </style>
-
 <nav class="navbar navbar-light bg-light shadow-sm py-3">
     <div class="container-fluid d-flex justify-content-between align-items-center">
         <a class="navbar-brand fw-bold text-dark" href="/">BulkBase</a>
         <div class="d-flex align-items-center gap-3">
             <a class="nav-link custom-nav-link" href="/">Start</a>
             <a class="nav-link custom-nav-link" href="/products">Produkte</a>
+            @if (role == "admin")
+            {
+                <a class="nav-link custom-nav-link" href="/admin">Admin</a>
+            }
         </div>
         <div class="d-flex align-items-center gap-3">
             <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
@@ -156,56 +159,63 @@
 </div>
 
 @code {
-private List<Product>? products;
-private bool showAll = false;
-private bool _initialized = false;
+    private List<Product>? products;
+    private bool showAll = false;
+    private bool _initialized = false;
+    private string? username;
+    private string? role;
 
-protected override async Task OnInitializedAsync()
-{
-products = await Db.Products.ToListAsync();
-}
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Db.Products.ToListAsync();
+    }
 
-protected override async Task OnAfterRenderAsync(bool firstRender)
-{
-if (firstRender && !_initialized)
-{
-_initialized = true;
-var username = await LocalStorage.GetUsername();
-if (string.IsNullOrEmpty(username))
-{
-Navigation.NavigateTo("/login", forceLoad: true);
-}
-}
-}
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            _initialized = true;
 
-private async Task Logout()
-{
-await LocalStorage.ClearUserData();
-Navigation.NavigateTo("/login", forceLoad: true);
-}
+            username = await LocalStorage.GetUsername();
+            role = await LocalStorage.GetRole();
 
-private void GoToProducts()
-{
-Navigation.NavigateTo("/products");
-}
+            if (string.IsNullOrEmpty(username))
+            {
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
 
-private async Task OnViewAllClicked()
-{
-Navigation.NavigateTo("/products");
-}
+            StateHasChanged(); // wichtig für das Anzeigen des Admin-Links
+        }
+    }
 
-private void NavigateToProduct(int productId)
-{
-Navigation.NavigateTo($"/product/{productId}");
-}
+    private async Task Logout()
+    {
+        await LocalStorage.ClearUserData();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
 
-private async Task AddToCart(Product product)
-{
-var username = await LocalStorage.GetUsername();
-var success = Ss.AddToCart(username, product.ProductId, 1);
-if (!success)
-{
-Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
-}
-}
+    private void GoToProducts()
+    {
+        Navigation.NavigateTo("/products");
+    }
+
+    private async Task OnViewAllClicked()
+    {
+        Navigation.NavigateTo("/products");
+    }
+
+    private void NavigateToProduct(int productId)
+    {
+        Navigation.NavigateTo($"/product/{productId}");
+    }
+
+    private async Task AddToCart(Product product)
+    {
+        var username = await LocalStorage.GetUsername();
+        var success = Ss.AddToCart(username, product.ProductId, 1);
+        if (!success)
+        {
+            Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
+        }
+    }
 }

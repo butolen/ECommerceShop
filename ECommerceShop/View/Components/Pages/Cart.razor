@@ -8,13 +8,25 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 @inject LocalStorageService LocalStorage
-<nav class="navbar navbar-light bg-light shadow-sm py-3">
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-        <a class="navbar-brand fw-bold text-dark" href="/">BulkBase</a>
-        <div class="d-flex align-items-center gap-3">
+
+        <!-- Logo -->
+        <a class="navbar-brand fw-bold fs-3 text-dark" href="/" style="margin-right: 30px;">
+            BulkBase
+        </a>
+
+        <!-- Navigation Buttons -->
+        <div class="d-flex align-items-center gap-2">
             <a class="nav-link custom-nav-link" href="/">Start</a>
             <a class="nav-link custom-nav-link" href="/products">Produkte</a>
+            @if (role == "admin")
+            {
+                <a class="nav-link custom-nav-link" href="/admin">Admin</a>
+            }
         </div>
+
+        <!-- Sign Out + Cart -->
         <div class="d-flex align-items-center gap-3">
             <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
             <a class="nav-link position-relative" href="/cart">
@@ -56,13 +68,6 @@
     }
 </style>
 
-@code {
-    private async Task Logout()
-    {
-        await LocalStorage.ClearUserData();
-        Navigation.NavigateTo("/login", forceLoad: true);
-    }
-}
 
 
 <div class="container mt-4">
@@ -124,59 +129,66 @@
     </div>
 </div>
 
-
 @code {
     private List<OrderItem> cartItems = new();
     private decimal totalPrice;
     private bool _initialized = false;
-    
-    private async Task CompleteCheckout()
-    {
-        var username = await LocalStorage.GetUsername();
-        if (string.IsNullOrEmpty(username))
-        {
-            Navigation.NavigateTo("/login", forceLoad: true);
-            return;
-        }
-
-        StoreService.CompletePurchase(username); // Neuer Service-Aufruf
-
-        // Leeren Warenkorb anzeigen
-        cartItems.Clear();
-        totalPrice = 0;
-
-        // Weiterleitung (optional)
-        Navigation.NavigateTo("/dummycheckout", forceLoad: true);
-    }
-
+    private string username;
+    private string? role;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !_initialized)
         {
             _initialized = true;
 
-            var username = await LocalStorage.GetUsername();
+            username = await LocalStorage.GetUsername();
+            role = await LocalStorage.GetRole(); // NEU
+
             if (string.IsNullOrEmpty(username))
             {
                 Navigation.NavigateTo("/login", forceLoad: true);
+                return;
             }
+
+            LoadCart();
+            StateHasChanged(); // wichtig für UI-Aktualisierung
         }
-    }
-    protected override void OnInitialized()
-    {
-       
-        LoadCart();
     }
 
     private void LoadCart()
     {
-        cartItems = StoreService.GetItemsByUser("h.muster");
+        if (string.IsNullOrEmpty(username)) return;
+
+        cartItems = StoreService.GetItemsByUser(username);
         totalPrice = cartItems.Sum(i => i.Product.Price * i.QuantityOrdered);
     }
 
     private void RemoveItem(int productId)
     {
-        StoreService.RemoveFromCart("h.muster", productId);
-        LoadCart(); // neu laden
+        if (string.IsNullOrEmpty(username)) return;
+
+        StoreService.RemoveFromCart(username, productId);
+        LoadCart();
+    }
+
+    private async Task CompleteCheckout()
+    {
+        if (string.IsNullOrEmpty(username))
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+
+        StoreService.CompletePurchase(username);
+        cartItems.Clear();
+        totalPrice = 0;
+
+        Navigation.NavigateTo("/dummycheckout", forceLoad: true);
+    }
+
+    private async Task Logout()
+    {
+        await LocalStorage.ClearUserData();
+        Navigation.NavigateTo("/login", forceLoad: true);
     }
 }

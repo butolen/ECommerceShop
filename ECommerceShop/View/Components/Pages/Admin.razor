@@ -15,11 +15,12 @@
         <div class="d-flex align-items-center gap-3">
             <a class="nav-link custom-nav-link" href="/">Start</a>
             <a class="nav-link custom-nav-link" href="/products">Produkte</a>
+            <a class="nav-link custom-nav-link" href="/admin">Admin</a>
         </div>
         <div class="d-flex align-items-center gap-3">
             <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
             <a class="nav-link position-relative" href="/cart">
-                <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
+                <img src="images/warenkorb.jpg" alt="Warenkorb" style="height: 30px;" />
             </a>
         </div>
     </div>
@@ -92,7 +93,7 @@
     }
 
     .admin-button {
-        background-color: #691c1c;
+        background-color: #2b1a8c;
         color: white;
         padding: 10px;
         border: none;
@@ -102,17 +103,7 @@
     }
 
     .admin-button:hover {
-        background-color: #8c1f1f;
-    }
-
-    .upload-button {
-        background-color: #2b1a8c;
-        color: white;
-        padding: 10px;
-        border: none;
-        border-radius: 20px;
-        font-weight: bold;
-        width: 100%;
+        background-color: #1a0d66;
     }
 
     .admin-textarea {
@@ -128,52 +119,52 @@
 </style>
 
 <div class="container">
-    <div class="admin-header">ADMIN SITE</div>
+    <div class="admin-header">Admin-Bereich</div>
 
     <div class="d-flex flex-wrap gap-5 justify-content-center">
+        <div class="d-flex flex-column gap-5">
+            <!-- Benutzer löschen -->
+            <div class="admin-card">
+                <h2>Benutzer löschen</h2>
+                <input class="admin-input" type="text" placeholder="Benutzername" @bind="deleteUsername" />
+                <button class="admin-button" @onclick="HandleDeleteUser">Löschen</button>
+            </div>
 
-        <!-- Delete a user -->
-        <div class="admin-card">
-            <h2>Delete a user</h2>
-            <input class="admin-input" type="text" placeholder="User" @bind="deleteUsername" />
-            <button class="admin-button" @onclick="HandleDeleteUser">Delete</button>
+            <!-- Produkt löschen -->
+            <div class="admin-card">
+                <h2>Produkt löschen</h2>
+                <input class="admin-input" type="text" placeholder="Produktname" @bind="deleteProductName" />
+                <button class="admin-button" @onclick="HandleDeleteProduct">Löschen</button>
+            </div>
         </div>
 
-        <!-- Add a product -->
+        <!-- Produkt hinzufügen -->
         <div class="admin-card" style="max-width: 500px;">
-            <h2>Add a product</h2>
+            <h2>Produkt hinzufügen</h2>
 
             <div class="d-flex gap-2">
                 <input class="admin-input" style="flex:1;" type="text" placeholder="Name" @bind="newProduct.Name" />
-                <input class="admin-input" style="flex:1;" type="text" placeholder="InStock" @bind="newProduct.InStock" />
+                <input class="admin-input" style="flex:1;" type="text" placeholder="Lagerbestand" @bind="newProduct.InStock" />
             </div>
 
             <div class="d-flex gap-2">
-                <input class="admin-input" style="flex:1;" type="text" placeholder="Price" @bind="newProduct.Price" />
-                <input class="admin-input" style="flex:1;" type="text" placeholder="Category" @bind="newProduct.Category" />
+                <input class="admin-input" style="flex:1;" type="text" placeholder="Preis" @bind="newProduct.Price" />
+                <input class="admin-input" style="flex:1;" type="text" placeholder="Kategorie" @bind="newProduct.Category" />
             </div>
 
-            <textarea class="admin-textarea" placeholder="Description..." @bind="newProduct.Description"></textarea>
+            <textarea class="admin-textarea" placeholder="Beschreibung..." @bind="newProduct.Description"></textarea>
 
-            <input class="admin-input" type="text" placeholder="Image filename (e.g. img1.jpg)" @bind="newProduct.Image" />
+            <InputFile OnChange="HandleImageUpload" class="admin-button" />
 
             <div class="d-flex gap-3 mt-2">
-                <button class="upload-button" disabled>Upload Image</button>
-                <button class="admin-button" @onclick="HandleAddProduct">Add</button>
+                <button class="admin-button" @onclick="HandleAddProduct">Hinzufügen</button>
             </div>
-        </div>
-
-        <!-- Delete a product -->
-        <div class="admin-card">
-            <h2>Delete a product</h2>
-            <input class="admin-input" type="text" placeholder="Name" @bind="deleteProductName" />
-            <button class="admin-button" @onclick="HandleDeleteProduct">Delete</button>
         </div>
     </div>
 
     @if (!string.IsNullOrEmpty(message))
     {
-    <p class="text-success text-center mt-4">@message</p>
+        <p class="text-success text-center mt-4">@message</p>
     }
 </div>
 
@@ -182,60 +173,83 @@ private string deleteUsername;
 private string deleteProductName;
 private string message;
 private Product newProduct = new();
-private string adminEmail = "admin@example.com";
 
 private void HandleDeleteUser()
 {
-bool success = StoreService.DeleteUser(deleteUsername);
-message = success ? "User deleted successfully." : "User not found.";
+    bool success = StoreService.DeleteUser(deleteUsername);
+    message = success ? "Benutzer erfolgreich gelöscht." : "Benutzer nicht gefunden.";
 }
 
 private void HandleAddProduct()
 {
-try
-{
-StoreService.AddProduct(newProduct);
-message = "Product added successfully.";
-newProduct = new(); // reset
+    try
+    {
+        StoreService.AddProduct(newProduct);
+        message = "Produkt erfolgreich hinzugefügt.";
+        newProduct = new(); // zurücksetzen
+    }
+    catch (Exception ex)
+    {
+        message = $"Fehler: {ex.Message}";
+    }
 }
-catch (Exception ex)
+
+private async Task HandleImageUpload(InputFileChangeEventArgs e)
 {
-message = $"Error: {ex.Message}";
-}
+    var file = e.File;
+    if (file != null)
+    {
+        var ext = Path.GetExtension(file.Name).ToLower();
+        var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+        if (!allowed.Contains(ext))
+        {
+            message = "Nur JPG, PNG oder WEBP erlaubt.";
+            return;
+        }
+
+        var uniqueName = $"{Guid.NewGuid()}{ext}";
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", uniqueName);
+
+        await using var stream = new FileStream(path, FileMode.Create);
+        await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(stream);
+
+        newProduct.Image = $"images/{uniqueName}";
+        message = $"Bild erfolgreich hochgeladen als {uniqueName}.";
+    }
 }
 
 private void HandleDeleteProduct()
 {
-bool success = StoreService.DeleteProduct(deleteProductName);
-message = success ? "Product deleted successfully." : "Product not found.";
+    bool success = StoreService.DeleteProduct(deleteProductName);
+    message = success ? "Produkt erfolgreich gelöscht." : "Produkt nicht gefunden.";
 }
 
 private async Task Logout()
 {
-await LocalStorage.ClearUserData();
-Navigation.NavigateTo("/login", forceLoad: true);
+    await LocalStorage.ClearUserData();
+    Navigation.NavigateTo("/login", forceLoad: true);
 }
 
 private bool _initialized = false;
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
 {
-if (firstRender && !_initialized)
-{
-_initialized = true;
+    if (firstRender && !_initialized)
+    {
+        _initialized = true;
 
-var username = await LocalStorage.GetUsername();
-if (string.IsNullOrEmpty(username))
-{
-Navigation.NavigateTo("/login", forceLoad: true);
-return;
-}
+        var username = await LocalStorage.GetUsername();
+        if (string.IsNullOrEmpty(username))
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+            return;
+        }
 
-var role = await LocalStorage.GetRole();
-if (!string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase))
-{
-Navigation.NavigateTo("/", forceLoad: true);
-}
-}
+        var role = await LocalStorage.GetRole();
+        if (!string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase))
+        {
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+    }
 }
 }

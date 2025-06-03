@@ -44,6 +44,10 @@
         <div class="d-flex align-items-center gap-3">
             <a class="nav-link custom-nav-link" href="/">Start</a>
             <a class="nav-link custom-nav-link" href="/products">Produkte</a>
+            @if (role == "admin")
+            {
+                <a class="nav-link custom-nav-link" href="/admin">Admin</a>
+            }
         </div>
         <div class="d-flex align-items-center gap-3">
             <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
@@ -65,19 +69,23 @@
 
 @code {
 private bool _initialized = false;
-
+private string? role;
 protected override async Task OnAfterRenderAsync(bool firstRender)
 {
-if (firstRender && !_initialized)
-{
-_initialized = true;
+    if (firstRender && !_initialized)
+    {
+        _initialized = true;
 
-var username = await LocalStorage.GetUsername();
-if (string.IsNullOrEmpty(username))
-{
-Navigation.NavigateTo("/login", forceLoad: true);
-}
-}
+        var username = await LocalStorage.GetUsername();
+        role = await LocalStorage.GetRole(); // NEU
+
+        if (string.IsNullOrEmpty(username))
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+
+        StateHasChanged(); // wichtig für die Anzeige des Admin-Links
+    }
 }
 
 private async Task Logout()
