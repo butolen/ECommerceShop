@@ -102,6 +102,7 @@ namespace ECommerceShop.DLL
                 return true;
             }
 
+            Console.WriteLine(BCrypt.Net.BCrypt.HashPassword("butolen123456"));
             Console.WriteLine("Login fehlgeschlagen.");
             return false;
         }
@@ -113,6 +114,7 @@ namespace ECommerceShop.DLL
             // E-Mail doppelt?
             bool emailExistsInUsers = _context.Users.Any(u => u.Email == email);
             bool emailExistsInAdmins = _context.Administrators.Any(a => a.Email == email);
+            
 
             if (emailExistsInUsers || emailExistsInAdmins)
             {

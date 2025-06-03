@@ -28,7 +28,7 @@ VALUES
 
 DELETE FROM administrators;
 INSERT INTO administrators(username, email, password) 
-VALUES('m.butolen','m.butolen@htlkrems.at','butolen123456');
+VALUES('m.butolen','m.butolen@htlkrems.at','$2a$11$B8sFD9DeouC4UQl8aDnFeuK2YKmseKqa35OS830JXnilJ8UzDJ4vK');
 
 
 INSERT INTO administrators(username, email, password)
