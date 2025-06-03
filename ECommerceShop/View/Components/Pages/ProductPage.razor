@@ -41,20 +41,24 @@
         background-color: #1f1f1f;
         color: white;
     }
+
+    .thumbnail-img {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 10px;
+    }
 </style>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-        <a class="navbar-brand fw-bold fs-3 text-dark" href="/" style="margin-right: 30px;">
-            BulkBase
-        </a>
+    <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap">
+        <a class="navbar-brand fw-bold fs-3 text-dark me-3" href="/">BulkBase</a>
 
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
             <a class="nav-link custom-nav-link" href="/">Start</a>
             <a class="nav-link custom-nav-link" href="/products">Produkte</a>
         </div>
 
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3 mt-2 mt-lg-0">
             <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
             <a class="nav-link position-relative" href="/cart">
                 <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
@@ -78,17 +82,17 @@ else
 {
     <div class="container mt-5">
         <div class="row">
-            <div class="col-md-2 d-none d-md-block">
-                <img src="@product.Image" class="img-thumbnail mb-3" />
-                <img src="@product.Image" class="img-thumbnail mb-3" />
-                <img src="@product.Image" class="img-thumbnail mb-3" />
+            <div class="col-12 col-md-2 d-none d-md-block">
+                <img src="@product.Image" class="thumbnail-img img-thumbnail" />
+                <img src="@product.Image" class="thumbnail-img img-thumbnail" />
+                <img src="@product.Image" class="thumbnail-img img-thumbnail" />
             </div>
 
-            <div class="col-md-5 text-center mb-4 mb-md-0">
-                <img src="@product.Image" class="img-fluid" style="max-height: 350px;" />
+            <div class="col-12 col-md-5 text-center mb-4 mb-md-0">
+                <img src="@product.Image" class="img-fluid rounded" style="max-height: 350px;" />
             </div>
 
-            <div class="col-md-5">
+            <div class="col-12 col-md-5">
                 <h2>@product.Name</h2>
 
                 @if (productReviews.Count > 0)
@@ -108,15 +112,17 @@ else
                 <p class="@GetStockClass() fw-bold">@GetStockMessage()</p>
                 <p>Noch verfügbar: @product.InStock</p>
 
-                <div class="input-group mb-3" style="width: 150px;">
+                <div class="input-group mb-3" style="max-width: 150px;">
                     <button class="btn btn-outline-secondary" @onclick="DecreaseQuantity">-</button>
                     <input type="text" class="form-control text-center" value="@quantity" readonly />
                     <button class="btn btn-outline-secondary" @onclick="IncreaseQuantity">+</button>
                 </div>
 
-                <button class="btn text-white w-100 mb-3" style="background-color:#C30017;" @onclick="AddToCart">Zum Warenkorb hinzufügen</button>
+                <button class="btn text-white w-100 mb-3" style="background-color:#C30017;" @onclick="AddToCart">
+                    Zum Warenkorb hinzufügen
+                </button>
 
-                <div class="border p-3">
+                <div class="border p-3 rounded">
                     <p><strong>🚚 Kostenlose Lieferung</strong></p>
                     <p>Postleitzahl eingeben für mehr Lieferdetails</p>
                     <hr />
@@ -148,9 +154,9 @@ else
         <button class="btn btn-primary" @onclick="SubmitReview">Review absenden</button>
     </div>
 
-    @if (productReviews.Count > 0)
-    {
-        <div class="container mt-5">
+    <div class="container mt-5">
+        @if (productReviews.Count > 0)
+        {
             <h4>Alle Bewertungen</h4>
             @foreach (var r in productReviews)
             {
@@ -162,14 +168,12 @@ else
                     </div>
                 </div>
             }
-        </div>
-    }
-    else
-    {
-        <div class="container mt-5">
+        }
+        else
+        {
             <p class="text-muted">Noch keine Bewertungen vorhanden.</p>
-        </div>
-    }
+        }
+    </div>
 }
 
 @code {

@@ -63,6 +63,7 @@
         color: white;
     }
 </style>
+
 @code {
     private async Task Logout()
     {
@@ -72,33 +73,35 @@
 }
 
 
-<div class="container mt-5">
+<div class="container mt-4">
     <div class="row">
-        <div class="col-md-7">
+        <div class="col-12 col-md-7">
             <h3 class="fw-bold">Dein Warenkorb</h3>
             <p>@cartItems.Count Artikel</p>
 
             @foreach (var item in cartItems)
             {
-                <div class="d-flex mb-4">
-                    <img src="@item.Product.Image" alt="@item.Product.Name" style="width: 120px; height: 120px; object-fit: cover;" class="me-3" />
+            <div class="d-flex flex-column flex-md-row mb-4 align-items-center">
+                <img src="@item.Product.Image" alt="@item.Product.Name"
+                     class="me-md-3 mb-2 mb-md-0"
+                     style="width: 120px; height: 120px; object-fit: cover;" />
 
-                    <div class="flex-grow-1">
-                        <h5 class="fw-bold mb-1">@item.Product.Name</h5>
-                        <p class="mb-1">Größe: Einheitsgröße<br />Farbe: Schwarz</p>
-                        <a href="/cart" class="text-danger text-decoration-none d-block mb-2"
-                           @onclick="() => RemoveItem(item.Product.ProductId)">Entfernen</a>
+                <div class="flex-grow-1 text-center text-md-start">
+                    <h5 class="fw-bold mb-1">@item.Product.Name</h5>
+                    <p class="mb-1">Größe: Einheitsgröße<br />Farbe: Schwarz</p>
+                    <a href="/cart" class="text-danger text-decoration-none d-block mb-2"
+                       @onclick="() => RemoveItem(item.Product.ProductId)">Entfernen</a>
 
-                        <div class="input-group" style="width: 120px;">
-                            <input type="text" class="form-control text-center" value="@item.QuantityOrdered" readonly />
-                        </div>
+                    <div class="input-group justify-content-center justify-content-md-start" style="width: 120px; margin: auto;">
+                        <input type="text" class="form-control text-center" value="@item.QuantityOrdered" readonly />
                     </div>
                 </div>
+            </div>
             }
         </div>
 
-        <div class="col-md-5">
-            <div class="border p-4 bg-light">
+        <div class="col-12 col-md-5">
+            <div class="border p-4 bg-light mt-4 mt-md-0">
                 <div class="d-flex justify-content-between mb-2">
                     <span>Zwischensumme:</span>
                     <span>@totalPrice.ToString("0.00")€</span>
@@ -117,7 +120,7 @@
                 </button>
 
                 <p class="fw-semibold mb-2">Unsere Zahlungsmethoden:</p>
-                <img src="images/payments.png" alt="Zahlungsmethoden" class="mb-3" style="max-width: 100%;" />
+                <img src="images/kreditkarten.png" alt="Zahlungsmethoden" class="img-fluid mb-3" />
 
                 <ul class="ps-3 small text-muted">
                     <li>30 Tage kostenlose Retoure</li>
@@ -128,6 +131,7 @@
         </div>
     </div>
 </div>
+
 
 @code {
     private List<OrderItem> cartItems = new();

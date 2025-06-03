@@ -8,62 +8,21 @@
 @using ECommerceShop.Configurations
 @using ECommerceShop.DLL
 @using ECommerceShop.Entities
-
 @using Microsoft.EntityFrameworkCore
 @using View.Components.Layout
 @inject LocalStorageService LocalStorage
 
 <style>
     .card-img-top {
-        width: 416px;
+        width: 100%;
         height: 200px;
         object-fit: cover;
         object-position: center;
     }
 
-    .logout-btn {
-        background-color: transparent;
-        border: 2px solid #1f1f1f;
-        color: #1f1f1f;
-        padding: 6px 16px;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
-
-    .logout-btn:hover {
-        background-color: #1f1f1f;
-        color: white;
-    }
-</style>
-<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-
-        <!-- Logo -->
-        <a class="navbar-brand fw-bold fs-3 text-dark" href="/" style="margin-right: 30px;">
-            BulkBase
-        </a>
-
-        <!-- Navigation Buttons -->
-        <div class="d-flex align-items-center gap-2">
-            <a class="nav-link custom-nav-link" href="/">Start</a>
-            <a class="nav-link custom-nav-link" href="/products">Produkte</a>
-        </div>
-
-        <!-- Sign Out + Cart -->
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
-            <a class="nav-link position-relative" href="/cart">
-                <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;"/>
-            </a>
-        </div>
-    </div>
-</nav>
-<style>
     .custom-nav-link {
         color: black;
-
         font-weight: 500;
-
         font-size: 1.2rem;
         padding: 7px 14px;
         border-radius: 6px;
@@ -91,70 +50,72 @@
     }
 </style>
 
-@code {
-
-    private async Task Logout()
-    {
-        await LocalStorage.ClearUserData();
-        Navigation.NavigateTo("/login", forceLoad: true);
-    }
-
-}
-
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold fs-3 text-dark" href="/">BulkBase</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <div class="navbar-nav">
+                <a class="nav-link custom-nav-link" href="/">Start</a>
+                <a class="nav-link custom-nav-link" href="/products">Produkte</a>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
+                <a class="nav-link position-relative" href="/cart">
+                    <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
 
 <h1 class="text-center fw-bold fs-1 mb-5">Bulk Base</h1>
 <div class="container">
-    <!-- Hero Slider -->
-
-    @*push*@
-    <!-- Produkte -->
     <section>
         <h2 class="fs-4 mb-3"><span style="color:#C30017;">▌</span> Unsere Produkte</h2>
-        <div class="mb-4">
-            <div class="input-group mb-3" style="max-width: 400px;">
-                <input type="text" class="form-control" placeholder="Produktname suchen..."
-                       @bind="searchTerm" @bind:event="oninput"/>
-                <button class="btn btn-outline-secondary" @onclick="SearchProducts">🔍</button>
-                <button class="btn btn-outline-danger" @onclick="ClearSearch">✖</button>
-            </div>
 
-            <!-- Kategorie Checkboxen -->
-            <div class="d-flex gap-3 flex-wrap mb-2">
-                @foreach (var category in categoryFilters.Keys)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="@category"
-                               checked="@CategoryValue(category)"
-                               @onchange="async e => await SetCategory(category, ((ChangeEventArgs)e).Value is bool b && b)"/>
-                        <label class="form-check-label" for="@category">@category</label>
-                    </div>
-                }
-            </div>
-
-            <!-- Preisfilter -->
-            <div class="mb-4">
-                <div class="d-flex gap-2" style="max-width: 300px;">
-                    <!-- Preisfilter -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Preis</label>
-                        <div class="d-flex gap-2" style="max-width: 300px;">
-                            <input type="number" class="form-control" placeholder="von" @bind="priceFrom"/>
-                            <input type="number" class="form-control" placeholder="bis" @bind="priceTo"/>
-                            <button class="btn btn-outline-secondary" @onclick="SearchProducts">🔍</button>
-                        </div>
-                    </div>
+        <div class="row mb-4 g-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Produktname suchen..."
+                           @bind="searchTerm" @bind:event="oninput" />
+                    <button class="btn btn-outline-secondary" @onclick="SearchProducts">🔍</button>
+                    <button class="btn btn-outline-danger" @onclick="ClearSearch">✖</button>
                 </div>
             </div>
-            <!-- Bewertungsfilter -->
-            <div class="mb-4" style="max-width: 300px;">
-                <label class="form-label fw-bold">Mindestbewertung (1–5)</label>
+
+            <div class="col-12 col-md-6 col-lg-8">
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var category in categoryFilters.Keys)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="@category"
+                                   checked="@CategoryValue(category)"
+                                   @onchange="async e => await SetCategory(category, ((ChangeEventArgs)e).Value is bool b && b)" />
+                            <label class="form-check-label" for="@category">@category</label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <label class="form-label fw-bold">Preis</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" min="1" max="5" step="1"
-                           @bind="minRating"/>
+                    <input type="number" class="form-control" placeholder="von" @bind="priceFrom" />
+                    <input type="number" class="form-control" placeholder="bis" @bind="priceTo" />
                     <button class="btn btn-outline-secondary" @onclick="SearchProducts">🔍</button>
                 </div>
             </div>
 
+            <div class="col-12 col-md-6 col-lg-4">
+                <label class="form-label fw-bold">Mindestbewertung (1–5)</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" min="1" max="5" step="1" @bind="minRating" />
+                    <button class="btn btn-outline-secondary" @onclick="SearchProducts">🔍</button>
+                </div>
+            </div>
         </div>
 
         <h3 class="fs-2 fw-bold mb-4">Entdecke die Welt des Sports</h3>
@@ -165,7 +126,7 @@
         }
         else
         {
-            <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
                 @foreach (var product in showAll ? products : products.Take(3))
                 {
                     <div class="col">
@@ -176,16 +137,13 @@
                                 <p class="card-text">@product.Description</p>
                                 <p class="fw-bold">@product.Price.ToString("0.00") €</p>
                                 <button class="btn text-white w-100" style="background-color:#C30017;"
-                                        @onclick="() => NavigateToProduct(product.ProductId)">Zum Produkt
-                                </button>
+                                        @onclick="() => NavigateToProduct(product.ProductId)">Zum Produkt</button>
                                 <button class="btn btn-outline-dark w-100 mt-2"
-                                        @onclick="() => AddToCart(product)">
-                                    In den Warenkorb
-                                </button>
+                                        @onclick="() => AddToCart(product)">In den Warenkorb</button>
                                 @if (productReviewMap.TryGetValue(product.ProductId, out var reviews) && reviews.Any())
                                 {
                                     var avgRating = reviews.Average(r => r.Rating);
-                                    <p class="mb-1">⭐ @avgRating.ToString("0.0") </p>
+                                    <p class="mb-1">⭐ @avgRating.ToString("0.0")</p>
                                 }
                                 else
                                 {
@@ -205,25 +163,25 @@
             </div>
         }
     </section>
-
 </div>
 
-<!-- Footer -->
-<div class="row text-center mt-5 py-5 text-white" style="background-color: #000;">
-    <div class="col-md-4">
-        <i class="bi bi-truck fs-2"></i>
-        <h5 class="mt-2">Schnelle und zuverlässige Lieferung</h5>
-        <p>Kostenlose Lieferung schon ab 140€</p>
-    </div>
-    <div class="col-md-4">
-        <i class="bi bi-headset fs-2"></i>
-        <h5 class="mt-2">Kundenservice</h5>
-        <p>Kundenservice per email</p>
-    </div>
-    <div class="col-md-4">
-        <i class="bi bi-arrow-counterclockwise fs-2"></i>
-        <h5 class="mt-2">Geld zurück Garantie</h5>
-        <p>30 Tage Rückgaberecht</p>
+<div class="container-fluid bg-dark text-white py-5 mt-5">
+    <div class="row text-center">
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
+            <i class="bi bi-truck fs-2"></i>
+            <h5 class="mt-2">Schnelle Lieferung</h5>
+            <p>Kostenlose Lieferung ab 140€</p>
+        </div>
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
+            <i class="bi bi-headset fs-2"></i>
+            <h5 class="mt-2">Kundenservice</h5>
+            <p>Per E-Mail erreichbar</p>
+        </div>
+        <div class="col-12 col-md-4">
+            <i class="bi bi-arrow-counterclockwise fs-2"></i>
+            <h5 class="mt-2">Geld zurück Garantie</h5>
+            <p>30 Tage Rückgabe</p>
+        </div>
     </div>
 </div>
 
@@ -232,12 +190,10 @@
     private bool showAll = true;
     private bool _initialized = false;
     private string searchTerm = "";
-
-// Preisfilter
     private decimal? priceFrom;
     private decimal? priceTo;
+    private int? minRating = null;
 
-// Kategorie-Checkboxen
     private Dictionary<string, bool> categoryFilters = new()
     {
         { "Hanteln", false },
@@ -245,87 +201,57 @@
         { "Zubehör", false }
     };
 
+    private Dictionary<int, List<Review>> productReviewMap = new();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !_initialized)
         {
             _initialized = true;
-
             var username = await LocalStorage.GetUsername();
             if (string.IsNullOrEmpty(username))
-            {
                 Navigation.NavigateTo("/login", forceLoad: true);
-            }
         }
     }
-
-    private Dictionary<int, List<Review>> productReviewMap = new();
 
     protected override async Task OnInitializedAsync()
     {
         products = await Db.Products.ToListAsync();
-
         productReviewMap = products.ToDictionary(
             p => p.ProductId,
-            p => Ss.GetReviewsForProduct(p.ProductId)
-        );
+            p => Ss.GetReviewsForProduct(p.ProductId));
     }
 
-    private void OnViewAllClicked()
-    {
-        showAll = true;
-    }
-
-    private void NavigateToProduct(int productId)
-    {
-        Navigation.NavigateTo($"/product/{productId}");
-    }
+    private void OnViewAllClicked() => showAll = true;
+    private void NavigateToProduct(int productId) => Navigation.NavigateTo($"/product/{productId}");
 
     private async Task AddToCart(Product product)
     {
         var username = await LocalStorage.GetUsername();
         var success = Ss.AddToCart(username, product.ProductId, 1);
         if (!success)
-        {
             Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
-        }
     }
 
     private async Task SearchProducts()
     {
-        // 1. Alle Produkte holen
         var allProducts = await Db.Products.ToListAsync();
-
-        // 2. Nach Name filtern
         IEnumerable<Product> filtered = allProducts;
+
         if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
             filtered = filtered.Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-        }
 
-        // 3. Kategorie-Filter
-        var selectedCategories = categoryFilters
-            .Where(c => c.Value)
-            .Select(c => c.Key)
-            .ToList();
-
+        var selectedCategories = categoryFilters.Where(c => c.Value).Select(c => c.Key).ToList();
         if (selectedCategories.Any())
-        {
             filtered = filtered.Where(p => selectedCategories.Contains(p.Category, StringComparer.OrdinalIgnoreCase));
-        }
 
-        // 4. Preisfilter anwenden
         if (priceFrom.HasValue)
-        {
             filtered = filtered.Where(p => p.Price >= priceFrom.Value);
-        }
 
         if (priceTo.HasValue)
-        {
             filtered = filtered.Where(p => p.Price <= priceTo.Value);
-        }
 
-        if (minRating.HasValue && minRating.Value >= 1 && minRating.Value <= 5)
+        if (minRating is >= 1 and <= 5)
         {
             filtered = filtered.Where(p =>
             {
@@ -336,11 +262,8 @@
             });
         }
 
-        // 5. Ergebnis setzen
         products = filtered.ToList();
     }
-
-    private int? minRating = null;
 
     private async Task ClearSearch()
     {
@@ -348,15 +271,16 @@
         await SearchProducts();
     }
 
-    private bool CategoryValue(string key)
-    {
-        return categoryFilters[key];
-    }
-
+    private bool CategoryValue(string key) => categoryFilters[key];
     private async Task SetCategory(string key, bool value)
     {
         categoryFilters[key] = value;
         await SearchProducts();
     }
 
+    private async Task Logout()
+    {
+        await LocalStorage.ClearUserData();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
 }

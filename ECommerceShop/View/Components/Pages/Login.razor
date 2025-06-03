@@ -13,6 +13,8 @@
 <style>
     body {
         background-color: white;
+        margin: 0;
+        font-family: system-ui, sans-serif;
     }
 
     .login-wrapper {
@@ -20,16 +22,17 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        padding: 1rem;
     }
 
     .login-box {
         background-color: white;
-        padding: 2.5rem;
+        padding: 2rem;
         border: 1px solid #e5e5e5;
         border-radius: 8px;
         width: 100%;
         max-width: 400px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
     }
 
     .login-title {
@@ -40,17 +43,15 @@
     }
 
     .login-subtitle {
-        font-size: 0.9rem;
-        color: #444;
+        font-size: 0.95rem;
+        color: #555;
         text-align: center;
         margin-bottom: 1.5rem;
     }
 
     .form-label {
-        display: block;
         font-size: 0.9rem;
         font-weight: 500;
-        text-align: left;
         margin-bottom: 0.25rem;
     }
 
@@ -63,31 +64,36 @@
         margin-bottom: 1rem;
     }
 
-    .form-button {
-        width: 100%;
-        background-color: #1f1f1f;
-        color: white;
-        padding: 0.75rem;
-        font-size: 1rem;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    }
+    .form-button,
     .form-button-register {
         width: 100%;
-        background-color: grey;
-        color: white;
         padding: 0.75rem;
         font-size: 1rem;
         border: none;
         border-radius: 6px;
         cursor: pointer;
-        margin-top: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+    .form-button {
+        background-color: #1f1f1f;
+        color: white;
+        margin-bottom: 0.5rem;
     }
 
     .form-button:hover {
         background-color: #333;
     }
+
+    .form-button-register {
+        background-color: grey;
+        color: white;
+    }
+
+    .form-button-register:hover {
+        background-color: #5f5f5f;
+    }
+    
 </style>
 
 <div class="login-wrapper">
@@ -111,55 +117,51 @@
 
         @if (!string.IsNullOrEmpty(message))
         {
-            <p class="text-center mt-3 text-danger">@message</p>
+        <p class="text-center mt-3 text-danger">@message</p>
         }
     </div>
 </div>
 
 @code {
-    private string email = string.Empty;
-    private string password = string.Empty;
-    private string username = string.Empty;
-    private string message = string.Empty;
-    private bool _hasRedirected = false;
+private string email = string.Empty;
+private string password = string.Empty;
+private string username = string.Empty;
+private string message = string.Empty;
+private bool _hasRedirected = false;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_hasRedirected)
-        {
-            _hasRedirected = true;
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+if (firstRender && !_hasRedirected)
+{
+_hasRedirected = true;
 
-            var storedUsername = await LocalStorage.GetUsername();
-            var storedRole = await LocalStorage.GetRole();
+var storedUsername = await LocalStorage.GetUsername();
+var storedRole = await LocalStorage.GetRole();
 
-            if (!string.IsNullOrEmpty(storedUsername) && !string.IsNullOrEmpty(storedRole))
-            {
-                if (storedRole == "admin")
-                    Navigation.NavigateTo("/Admin", forceLoad: true);
-                else
-                    Navigation.NavigateTo("/", forceLoad: true);
-            }
-        }
-    }
+if (!string.IsNullOrEmpty(storedUsername) && !string.IsNullOrEmpty(storedRole))
+{
+Navigation.NavigateTo(storedRole == "admin" ? "/Admin" : "/", forceLoad: true);
+}
+}
+}
 
-    private async Task HandleLogin()
-    {
-        bool success = StoreService.Login(email, username, password, out var role);
-        if (success)
-        {
-            await LocalStorage.SetUserData(username, email, role);
-            Navigation.NavigateTo(role == "admin" ? "/Admin" : "/", forceLoad: true);
-        }
-        else
-        {
-            message = "Login fehlgeschlagen. Falsche Daten.";
-        }
-    }
+private async Task HandleLogin()
+{
+bool success = StoreService.Login(email, username, password, out var role);
+if (success)
+{
+await LocalStorage.SetUserData(username, email, role);
+Navigation.NavigateTo(role == "admin" ? "/Admin" : "/", forceLoad: true);
+}
+else
+{
+message = "Login fehlgeschlagen. Falsche Daten.";
+}
+}
 
-    private void HandleRegister()
-    {
-        string registerMessage;
-        bool registered = StoreService.RegisterUser(email, username, password, out registerMessage);
-        message = registerMessage;
-    }
+private void HandleRegister()
+{
+bool registered = StoreService.RegisterUser(email, username, password, out string registerMessage);
+message = registerMessage;
+}
 }

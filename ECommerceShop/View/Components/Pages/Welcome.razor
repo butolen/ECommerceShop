@@ -14,19 +14,20 @@
 
 <style>
     .card-img-top {
-        width: 416px;
+        width: 100%;
         height: 200px;
         object-fit: cover;
         object-position: center;
     }
-     .custom-nav-link {
-         color: black;
-         font-weight: 500;
-         font-size: 1.2rem;
-         padding: 7px 14px;
-         border-radius: 6px;
-         transition: background-color 0.3s ease, color 0.3s ease;
-     }
+
+    .custom-nav-link {
+        color: black;
+        font-weight: 500;
+        font-size: 1.2rem;
+        padding: 7px 14px;
+        border-radius: 6px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
     .custom-nav-link:hover {
         background-color: #f0f0f0;
@@ -47,50 +48,48 @@
         background-color: #1f1f1f;
         color: white;
     }
+    
 </style>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm py-3">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-
-        <!-- Logo -->
-        <a class="navbar-brand fw-bold fs-3 text-dark" href="/" style="margin-right: 30px;">
-            BulkBase
-        </a>
-
-        <!-- Navigation Buttons -->
-        <div class="d-flex align-items-center gap-2">
-            <a class="nav-link custom-nav-link" href="/">Start</a>
-            <a class="nav-link custom-nav-link" href="/products">Produkte</a>
-        </div>
-
-        <!-- Sign Out + Cart -->
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
-            <a class="nav-link position-relative" href="/cart">
-                <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
-            </a>
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-dark" href="/">BulkBase</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <div class="d-flex gap-2">
+                <a class="nav-link custom-nav-link" href="/">Start</a>
+                <a class="nav-link custom-nav-link" href="/products">Produkte</a>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn logout-btn fw-semibold" @onclick="Logout">Ausloggen</button>
+                <a class="nav-link position-relative" href="/cart">
+                    <img src="images/warenkorb.jpg" alt="Cart" style="height: 30px;" />
+                </a>
+            </div>
         </div>
     </div>
 </nav>
 
+<h1 class="text-center fw-bold fs-1 mb-5 mt-4">Willkommen bei BulkBase</h1>
 
-<h1 class="text-center fw-bold fs-1 mb-5">Willkommen bei BulkBase</h1>
 <div class="container">
     <!-- Hero Section -->
-    <div class="mb-5 position-relative bg-black text-white text-center p-5 rounded">
+    <div class="mb-5 position-relative bg-black text-white text-center p-5 rounded hero-section">
         <h2 class="display-4 mb-3">Dein Fitness-Store für Hanteln & Geräte</h2>
         <p class="fs-5">Top Qualität. Faire Preise. Direkt zu dir nach Hause.</p>
         <button class="btn btn-light mt-4 px-5 py-2 fs-5" @onclick="GoToProducts">Zu den Produkten →</button>
     </div>
-    @*push*@
+
     <!-- Vorteile -->
     <div class="row text-center py-5">
-        <div class="col-md-4">
+        <div class="col-md-4 mb-4 mb-md-0">
             <i class="bi bi-lightning-charge-fill fs-1 text-danger"></i>
             <h5 class="mt-3">Schneller Versand</h5>
             <p>Lieferung innerhalb von 2–4 Werktagen</p>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 mb-4 mb-md-0">
             <i class="bi bi-gem fs-1 text-danger"></i>
             <h5 class="mt-3">Premium Qualität</h5>
             <p>Nur geprüfte Fitnessgeräte & Zubehör</p>
@@ -101,121 +100,118 @@
             <p>Wir sind erst zufrieden, wenn du es bist</p>
         </div>
     </div>
-</div>
 
-<section>
-    <h2 class="fs-4 mb-3"><span style="color:#C30017;">▌</span> Unsere Produkte</h2>
-    <h3 class="fs-2 fw-bold mb-4">Entdecke die Welt des Kraftsports</h3>
+    <!-- Produkte -->
+    <section>
+        <h2 class="fs-4 mb-3"><span style="color:#C30017;">▌</span> Unsere Produkte</h2>
+        <h3 class="fs-2 fw-bold mb-4">Entdecke die Welt des Kraftsports</h3>
 
-    @if (products == null)
-    {
-        <p>Loading products...</p>
-    }
-    else
-    {
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+        @if (products == null)
+        {
+        <p>Lade Produkte...</p>
+        }
+        else
+        {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             @foreach (var product in showAll ? products : products.Take(3))
             {
-                <div class="col">
-                    <div class="card h-100">
-                        <img src="@product.Image" class="card-img-top" alt="@product.Name">
-                        <div class="card-body">
-                            <h5 class="card-title">@product.Name</h5>
-                            <p class="card-text">@product.Description</p>
-                            <p class="fw-bold">@product.Price.ToString("0.00") €</p>
-                            <button class="btn text-white w-100" style="background-color:#C30017;"
-                                    @onclick="() => NavigateToProduct(product.ProductId)">Zum Produkt</button>
-                            <button class="btn btn-outline-dark w-100 mt-2"
-                                    @onclick="() => AddToCart(product)">
-                                In den Warenkorb
-                            </button>
-                        </div>
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@product.Image" class="card-img-top" alt="@product.Name">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@product.Name</h5>
+                        <p class="card-text">@product.Description</p>
+                        <p class="fw-bold">@product.Price.ToString("0.00") €</p>
+                        <button class="btn text-white mt-auto" style="background-color:#C30017;"
+                                @onclick="() => NavigateToProduct(product.ProductId)">Zum Produkt</button>
+                        <button class="btn btn-outline-dark mt-2"
+                                @onclick="() => AddToCart(product)">In den Warenkorb</button>
                     </div>
                 </div>
+            </div>
             }
         </div>
-    }
+        }
 
-    @if (!showAll)
-    {
+        @if (!showAll)
+        {
         <div class="text-center mt-4">
             <button class="btn btn-outline-dark px-5" @onclick="OnViewAllClicked">Mehr...</button>
         </div>
-    }
-</section>
+        }
+    </section>
 
-<!-- Footer -->
-<div class="row text-center mt-5 py-5 text-white" style="background-color: #000;">
-    <div class="col-md-4">
-        <i class="bi bi-truck fs-2"></i>
-        <h5 class="mt-2">Schnelle und zuverlässige Lieferung</h5>
-        <p>Kostenlose Lieferung schon ab 140€</p>
-    </div>
-    <div class="col-md-4">
-        <i class="bi bi-headset fs-2"></i>
-        <h5 class="mt-2">Kunden Service</h5>
-        <p>Per Email</p>
-    </div>
-    <div class="col-md-4">
-        <i class="bi bi-arrow-counterclockwise fs-2"></i>
-        <h5 class="mt-2">Geld zurück Garantie</h5>
-        <p>Kostenlose Rückgabe für 30 Tage</p>
+    <!-- Footer -->
+    <div class="row text-center mt-5 py-5 text-white" style="background-color: #000;">
+        <div class="col-md-4 mb-4 mb-md-0">
+            <i class="bi bi-truck fs-2"></i>
+            <h5 class="mt-2">Schnelle und zuverlässige Lieferung</h5>
+            <p>Kostenlose Lieferung schon ab 140€</p>
+        </div>
+        <div class="col-md-4 mb-4 mb-md-0">
+            <i class="bi bi-headset fs-2"></i>
+            <h5 class="mt-2">Kunden Service</h5>
+            <p>Per Email</p>
+        </div>
+        <div class="col-md-4">
+            <i class="bi bi-arrow-counterclockwise fs-2"></i>
+            <h5 class="mt-2">Geld zurück Garantie</h5>
+            <p>Kostenlose Rückgabe für 30 Tage</p>
+        </div>
     </div>
 </div>
 
 @code {
-    
-    private async Task Logout()
-    {
-        await LocalStorage.ClearUserData();
-        Navigation.NavigateTo("/login", forceLoad: true);
-    }
-    
+private List<Product>? products;
+private bool showAll = false;
+private bool _initialized = false;
+
+protected override async Task OnInitializedAsync()
+{
+products = await Db.Products.ToListAsync();
+}
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+if (firstRender && !_initialized)
+{
+_initialized = true;
+var username = await LocalStorage.GetUsername();
+if (string.IsNullOrEmpty(username))
+{
+Navigation.NavigateTo("/login", forceLoad: true);
+}
+}
+}
+
+private async Task Logout()
+{
+await LocalStorage.ClearUserData();
+Navigation.NavigateTo("/login", forceLoad: true);
+}
+
 private void GoToProducts()
 {
 Navigation.NavigateTo("/products");
 }
+
+private async Task OnViewAllClicked()
+{
+Navigation.NavigateTo("/products");
 }
-@code {
-    private List<Product>? products;
-    private bool showAll = false;
-    private bool _initialized = false;
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_initialized)
-        {
-            _initialized = true;
 
-            var username = await LocalStorage.GetUsername();
-            if (string.IsNullOrEmpty(username))
-            {
-                Navigation.NavigateTo("/login", forceLoad: true);
-            }
-        }
-    }
-    
-    protected override async Task OnInitializedAsync()
-    {
-        products = await Db.Products.ToListAsync();
-    }
+private void NavigateToProduct(int productId)
+{
+Navigation.NavigateTo($"/product/{productId}");
+}
 
-    private async Task OnViewAllClicked()
-    {
-        Navigation.NavigateTo("/products");
-    }
-
-    private void NavigateToProduct(int productId)
-    {
-        Navigation.NavigateTo($"/product/{productId}");
-    }
-    private async Task AddToCart(Product product)
-    {
-        var username = await LocalStorage.GetUsername();
-        var success = Ss.AddToCart(username, product.ProductId, 1);
-        if (!success)
-        {
-            // Optional: Anzeige eines Fehlers, Toast, Alert oder ähnliches
-            Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
-        }
-    }
+private async Task AddToCart(Product product)
+{
+var username = await LocalStorage.GetUsername();
+var success = Ss.AddToCart(username, product.ProductId, 1);
+if (!success)
+{
+Console.WriteLine("Nicht genügend Lagerbestand verfügbar.");
+}
+}
 }
