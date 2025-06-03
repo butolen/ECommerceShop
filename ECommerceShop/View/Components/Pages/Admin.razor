@@ -63,8 +63,7 @@
     .admin-header {
         background-color: #1d5cf2;
         color: white;
-        padding: 20px;
-        text-align: center;
+        padding: 20px 0;
         font-size: 1.75rem;
         font-weight: bold;
         margin-bottom: 30px;
@@ -91,7 +90,13 @@
         border-radius: 4px;
         font-weight: bold;
     }
-
+    .custom-file-upload {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
     .admin-button {
         background-color: #2b1a8c;
         color: white;
@@ -100,6 +105,10 @@
         border-radius: 20px;
         font-weight: bold;
         width: 100%;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .admin-button:hover {
@@ -119,22 +128,25 @@
 </style>
 
 <div class="container">
-    <div class="admin-header">Admin-Bereich</div>
-
+    <div class="admin-header">
+        <div class="container-fluid text-center">
+            Admin-Bereich
+        </div>
+    </div>
     <div class="d-flex flex-wrap gap-5 justify-content-center">
         <div class="d-flex flex-column gap-5">
             <!-- Benutzer löschen -->
             <div class="admin-card">
                 <h2>Benutzer löschen</h2>
                 <input class="admin-input" type="text" placeholder="Benutzername" @bind="deleteUsername" />
-                <button class="admin-button" @onclick="HandleDeleteUser">Löschen</button>
+                <button class="admin-button" @onclick="HandleDeleteUser" style="background-color: red">Löschen</button>
             </div>
 
             <!-- Produkt löschen -->
             <div class="admin-card">
                 <h2>Produkt löschen</h2>
                 <input class="admin-input" type="text" placeholder="Produktname" @bind="deleteProductName" />
-                <button class="admin-button" @onclick="HandleDeleteProduct">Löschen</button>
+                <button class="admin-button" @onclick="HandleDeleteProduct" style="background-color: red">Löschen</button>
             </div>
         </div>
 
@@ -154,7 +166,10 @@
 
             <textarea class="admin-textarea" placeholder="Beschreibung..." @bind="newProduct.Description"></textarea>
 
-            <InputFile OnChange="HandleImageUpload" class="admin-button" />
+            <label class="admin-button custom-file-upload">
+                <InputFile OnChange="HandleImageUpload" class="d-none" />
+                Bild auswählen
+            </label>
 
             <div class="d-flex gap-3 mt-2">
                 <button class="admin-button" @onclick="HandleAddProduct">Hinzufügen</button>
