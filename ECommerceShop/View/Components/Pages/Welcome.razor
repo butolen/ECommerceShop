@@ -48,6 +48,7 @@
         background-color: #1f1f1f;
         color: white;
     }
+   
 </style>
 <nav class="navbar navbar-light bg-light shadow-sm py-3">
     <div class="container-fluid d-flex justify-content-between align-items-center">
@@ -119,6 +120,16 @@
                         <h5 class="card-title">@product.Name</h5>
                         <p class="card-text">@product.Description</p>
                         <p class="fw-bold">@product.Price.ToString("0.00") €</p>
+                        @if (productReviewMap.TryGetValue(product.ProductId, out var reviews) && reviews.Any())
+                        {
+                            var avgRating = reviews.Average(r => r.Rating);
+                            <p class="mb-1">⭐ @avgRating.ToString("0.0")</p>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-1">Noch keine Bewertungen</p>
+                        }
+
                         <button class="btn text-white mt-auto" style="background-color:#C30017;"
                                 @onclick="() => NavigateToProduct(product.ProductId)">Zum Produkt</button>
                         <button class="btn btn-outline-dark mt-2"
@@ -139,26 +150,29 @@
     </section>
 
     <!-- Footer -->
-    <div class="row text-center mt-5 py-5 text-white" style="background-color: #000;">
-        <div class="col-md-4 mb-4 mb-md-0">
+    
+</div>
+<div class="container-fluid bg-dark text-white py-5 mt-5">
+    <div class="row text-center">
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
             <i class="bi bi-truck fs-2"></i>
-            <h5 class="mt-2">Schnelle und zuverlässige Lieferung</h5>
-            <p>Kostenlose Lieferung schon ab 140€</p>
+            <h5 class="mt-2">Schnelle Lieferung</h5>
+            <p>Kostenlose Lieferung ab 140€</p>
         </div>
-        <div class="col-md-4 mb-4 mb-md-0">
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
             <i class="bi bi-headset fs-2"></i>
-            <h5 class="mt-2">Kunden Service</h5>
-            <p>Per Email</p>
+            <h5 class="mt-2">Kundenservice</h5>
+            <p>Per E-Mail erreichbar</p>
         </div>
-        <div class="col-md-4">
+        <div class="col-12 col-md-4">
             <i class="bi bi-arrow-counterclockwise fs-2"></i>
             <h5 class="mt-2">Geld zurück Garantie</h5>
-            <p>Kostenlose Rückgabe für 30 Tage</p>
+            <p>30 Tage Rückgabe</p>
         </div>
     </div>
 </div>
-
 @code {
+    private Dictionary<int, List<Review>> productReviewMap = new();
     private List<Product>? products;
     private bool showAll = false;
     private bool _initialized = false;
@@ -168,6 +182,9 @@
     protected override async Task OnInitializedAsync()
     {
         products = await Db.Products.ToListAsync();
+        productReviewMap = products.ToDictionary(
+            p => p.ProductId,
+            p => Ss.GetReviewsForProduct(p.ProductId));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

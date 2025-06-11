@@ -18,6 +18,26 @@ namespace ECommerceShop.DLL
             _session = session;
         }
         
+        public bool DeleteUser(string username)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            if (user == null) return false;
+
+            // Erstelle Kopie im DeletedUser
+            var deleted = new DeletedUser
+            {
+                Username = user.Username,
+                Email = user.Email,
+               
+                DeletedAt = DateTime.UtcNow
+            };
+
+            _context.DeletedUsers.Add(deleted);
+            _context.Users.Remove(user);
+
+            _context.SaveChanges();
+            return true;
+        }
         public bool AddToCart(string username, int productId, int quantity)
         {
             // Produkt und Benutzer holen
@@ -111,10 +131,17 @@ namespace ECommerceShop.DLL
         {
             message = null;
 
+            // Benutzername in "DeletedUsers" gebannt?
+            bool isBanned = _context.DeletedUsers.Any(d => d.Username == username);
+            if (isBanned)
+            {
+                message = "Registrierung nicht möglich: Dieser Benutzer wurde dauerhaft gesperrt.";
+                return false;
+            }
+
             // E-Mail doppelt?
             bool emailExistsInUsers = _context.Users.Any(u => u.Email == email);
             bool emailExistsInAdmins = _context.Administrators.Any(a => a.Email == email);
-            
 
             if (emailExistsInUsers || emailExistsInAdmins)
             {
@@ -190,22 +217,7 @@ namespace ECommerceShop.DLL
             _context.SaveChanges();
             return true;
         }
-        public bool DeleteUser(string username)
-        {
-            var user = _context.Users
-                .Include(u => u.OrderItems)
-                .Include(u => u.Reviews)
-                .FirstOrDefault(u => u.Username == username);
-
-            if (user == null) return false;
-
-            _context.OrderItems.RemoveRange(user.OrderItems);
-            _context.Reviews.RemoveRange(user.Reviews);
-            _context.Users.Remove(user);
-            _context.SaveChanges();
-
-            return true;
-        }
+       
 
         
         public void RemoveFromCart(string username, int productId)

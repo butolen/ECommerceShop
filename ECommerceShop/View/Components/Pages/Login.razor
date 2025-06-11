@@ -105,12 +105,14 @@
             <label class="form-label">Email</label>
             <input type="email" @bind="email" class="form-input" placeholder="Email" required />
 
-            <label class="form-label">Passwort</label>
-            <input type="password" @bind="password" class="form-input" placeholder="Passwort" required />
-
             <label class="form-label">Name</label>
             <input type="text" @bind="username" class="form-input" placeholder="Name" required />
 
+
+            <label class="form-label">Passwort</label>
+            <input type="password" @bind="password" class="form-input" placeholder="Passwort" required />
+
+            
             <button type="submit" class="form-button">Anmelden</button>
             <button type="button" class="form-button-register" @onclick="HandleRegister">Registrieren</button>
         </form>

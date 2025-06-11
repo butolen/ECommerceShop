@@ -90,13 +90,7 @@
         border-radius: 4px;
         font-weight: bold;
     }
-    .custom-file-upload {
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-    }
+
     .admin-button {
         background-color: #2b1a8c;
         color: white;
@@ -106,9 +100,6 @@
         font-weight: bold;
         width: 100%;
         text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     .admin-button:hover {
@@ -128,13 +119,13 @@
 </style>
 
 <div class="container">
-    <div class="admin-header">
-        <div class="container-fluid text-center">
-            Admin-Bereich
-        </div>
+    <div class="admin-header text-center">
+        Admin-Bereich
     </div>
+
     <div class="d-flex flex-wrap gap-5 justify-content-center">
         <div class="d-flex flex-column gap-5">
+
             <!-- Benutzer löschen -->
             <div class="admin-card">
                 <h2>Benutzer löschen</h2>
@@ -154,26 +145,44 @@
         <div class="admin-card" style="max-width: 500px;">
             <h2>Produkt hinzufügen</h2>
 
-            <div class="d-flex gap-2">
-                <input class="admin-input" style="flex:1;" type="text" placeholder="Name" @bind="newProduct.Name" />
-                <input class="admin-input" style="flex:1;" type="text" placeholder="Lagerbestand" @bind="newProduct.InStock" />
+            <label class="fw-bold">Name</label>
+            <input class="admin-input" type="text" @bind="newProduct.Name" />
+
+            <label class="fw-bold">Lagerbestand</label>
+            <input class="admin-input" type="number" @bind="newProduct.InStock" />
+
+            <label class="fw-bold">Preis (€)</label>
+            <input class="admin-input" type="number" step="0.01" @bind="newProduct.Price" />
+
+            <label class="fw-bold">Kategorie</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="kat1" name="category"
+                       checked="@IsChecked("Hanteln")"
+                       @onchange='@(() => SelectCategory("Hanteln"))' />
+                <label class="form-check-label" for="kat1">Hanteln</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="kat2" name="category"
+                       checked="@IsChecked("Geräte")"
+                       @onchange='@(() => SelectCategory("Geräte"))' />
+                <label class="form-check-label" for="kat2">Geräte</label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" id="kat3" name="category"
+                       checked="@IsChecked("Zubehör")"
+                       @onchange='@(() => SelectCategory("Zubehör"))' />
+                <label class="form-check-label" for="kat3">Zubehör</label>
             </div>
 
-            <div class="d-flex gap-2">
-                <input class="admin-input" style="flex:1;" type="text" placeholder="Preis" @bind="newProduct.Price" />
-                <input class="admin-input" style="flex:1;" type="text" placeholder="Kategorie" @bind="newProduct.Category" />
-            </div>
-
-            <textarea class="admin-textarea" placeholder="Beschreibung..." @bind="newProduct.Description"></textarea>
+            <label class="fw-bold">Beschreibung</label>
+            <textarea class="admin-textarea" @bind="newProduct.Description"></textarea>
 
             <label class="admin-button custom-file-upload">
                 <InputFile OnChange="HandleImageUpload" class="d-none" />
                 Bild auswählen
             </label>
 
-            <div class="d-flex gap-3 mt-2">
-                <button class="admin-button" @onclick="HandleAddProduct">Hinzufügen</button>
-            </div>
+            <button class="admin-button mt-3" @onclick="HandleAddProduct">Hinzufügen</button>
         </div>
     </div>
 
@@ -184,87 +193,90 @@
 </div>
 
 @code {
-private string deleteUsername;
-private string deleteProductName;
-private string message;
-private Product newProduct = new();
+    private string deleteUsername;
+    private string deleteProductName;
+    private string message;
+    private Product newProduct = new();
 
-private void HandleDeleteUser()
-{
-    bool success = StoreService.DeleteUser(deleteUsername);
-    message = success ? "Benutzer erfolgreich gelöscht." : "Benutzer nicht gefunden.";
-}
-
-private void HandleAddProduct()
-{
-    try
+    private void HandleDeleteUser()
     {
-        StoreService.AddProduct(newProduct);
-        message = "Produkt erfolgreich hinzugefügt.";
-        newProduct = new(); // zurücksetzen
+        bool success = StoreService.DeleteUser(deleteUsername);
+        message = success ? "Benutzer erfolgreich gelöscht." : "Benutzer nicht gefunden.";
     }
-    catch (Exception ex)
-    {
-        message = $"Fehler: {ex.Message}";
-    }
-}
 
-private async Task HandleImageUpload(InputFileChangeEventArgs e)
-{
-    var file = e.File;
-    if (file != null)
+    private void HandleDeleteProduct()
     {
-        var ext = Path.GetExtension(file.Name).ToLower();
-        var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-        if (!allowed.Contains(ext))
+        bool success = StoreService.DeleteProduct(deleteProductName);
+        message = success ? "Produkt erfolgreich gelöscht." : "Produkt nicht gefunden.";
+    }
+
+    private void HandleAddProduct()
+    {
+        try
         {
-            message = "Nur JPG, PNG oder WEBP erlaubt.";
-            return;
+            StoreService.AddProduct(newProduct);
+            message = "Produkt erfolgreich hinzugefügt.";
+            newProduct = new(); // Reset
         }
-
-        var uniqueName = $"{Guid.NewGuid()}{ext}";
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", uniqueName);
-
-        await using var stream = new FileStream(path, FileMode.Create);
-        await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(stream);
-
-        newProduct.Image = $"images/{uniqueName}";
-        message = $"Bild erfolgreich hochgeladen als {uniqueName}.";
-    }
-}
-
-private void HandleDeleteProduct()
-{
-    bool success = StoreService.DeleteProduct(deleteProductName);
-    message = success ? "Produkt erfolgreich gelöscht." : "Produkt nicht gefunden.";
-}
-
-private async Task Logout()
-{
-    await LocalStorage.ClearUserData();
-    Navigation.NavigateTo("/login", forceLoad: true);
-}
-
-private bool _initialized = false;
-
-protected override async Task OnAfterRenderAsync(bool firstRender)
-{
-    if (firstRender && !_initialized)
-    {
-        _initialized = true;
-
-        var username = await LocalStorage.GetUsername();
-        if (string.IsNullOrEmpty(username))
+        catch (Exception ex)
         {
-            Navigation.NavigateTo("/login", forceLoad: true);
-            return;
-        }
-
-        var role = await LocalStorage.GetRole();
-        if (!string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase))
-        {
-            Navigation.NavigateTo("/", forceLoad: true);
+            message = $"Fehler: {ex.Message}";
         }
     }
-}
+
+    private bool IsChecked(string kat) => newProduct.Category == kat;
+    private void SelectCategory(string kat) => newProduct.Category = kat;
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var ext = Path.GetExtension(file.Name).ToLower();
+            var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            if (!allowed.Contains(ext))
+            {
+                message = "Nur JPG, PNG oder WEBP erlaubt.";
+                return;
+            }
+
+            var uniqueName = $"{Guid.NewGuid()}{ext}";
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", uniqueName);
+
+            await using var stream = new FileStream(path, FileMode.Create);
+            await file.OpenReadStream(5 * 1024 * 1024).CopyToAsync(stream);
+
+            newProduct.Image = $"images/{uniqueName}";
+            message = $"Bild erfolgreich hochgeladen als {uniqueName}.";
+        }
+    }
+
+    private async Task Logout()
+    {
+        await LocalStorage.ClearUserData();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    private bool _initialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            _initialized = true;
+
+            var username = await LocalStorage.GetUsername();
+            if (string.IsNullOrEmpty(username))
+            {
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            var role = await LocalStorage.GetRole();
+            if (!string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase))
+            {
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+        }
+    }
 }
